@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Cargar imagen del electrocardiograma
-img = cv2.imread('IMG\electro1.jpg')
+img = cv2.imread('IMG/electro1.JPG')
 
 # Convertir imagen a escala de grises
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -51,10 +51,33 @@ cv2.destroyAllWindows()
 # Leer la imagen del contorno guardada
 contour_img = cv2.imread('IMG\contorno.png', cv2.IMREAD_UNCHANGED)
 
+# Define the color to search for (green)
+green = np.array([0, 255, 0, 255], dtype=np.uint8)
+
+# Find the x and y coordinates of the green pixels
+y_coords, x_coords = np.where(np.all(contour_img == green, axis=-1))
+
+# Print the x and y coordinates
+print("X values:", x_coords)
+print("Y values:", y_coords)
+
+# Create a scatter plot of the x and y values
+plt.scatter(x_coords, y_coords, s=1)
+# Invert the y-axis
+plt.gca().invert_yaxis()
+
+# Show the plot
+plt.show()
+
+
+
 # Convertir la imagen a RGB para ser compatible con Matplotlib
-contour_img_rgb = cv2.cvtColor(contour_img, cv2.COLOR_BGRA2RGBA)
+#contour_img_rgba = cv2.cvtColor(contour_img, cv2.COLOR_BGRA2RGBA)
+
+
+
 
 # Mostrar la imagen del contorno utilizando Matplotlib
-plt.imshow(contour_img_rgb)
-plt.axis('on')
-plt.show()
+#plt.imshow(contour_img_rgba)
+#plt.axis('on')
+#plt.show()
