@@ -13,7 +13,7 @@ def slimUp(slimPx,imgLine):
     for col in range(imagen.shape[1]):
         nPx=0# almacena el numero de pixeles verdes en la columna
         # recorre los px segun las filas de la colunna 
-        for fil in range(imagen.shape[0]-1):
+        for fil in range(imagen.shape[0]):
             #verifica si el px es verde 
             if (set(imagen[fil, col]) == set(GREEN)):
                 #aumentan los px verdes
@@ -45,7 +45,28 @@ def slimUp(slimPx,imgLine):
 
 def slimDown(slimPx,imgLine):
     imagen = imgLine.copy()
-    pass
+    antfil = None 
+    filVerde =None 
+    for col in range(imagen.shape[1]):
+        nPx=0
+        for fil in range(imagen.shape[0]-1,0,-1):
+            if (set(imagen[fil, col]) == set(GREEN)):
+                nPx+=1
+                if nPx>=1 and nPx<=slimPx:
+                    filVerde=fil
+                elif nPx>=slimPx:
+                    #si el px de la columna anterior existe y es menor, sige 
+                    #permitiendo px verdes de lo contrario los elimina 
+                    imagen[fil, col] = GREEN if not antfil is None and antfil < fil else NONCOLOR 
+        #mientras el px de la columna anterior existe y su posision es mayor
+        while not antfil is None and antfil > filVerde:
+            #Actualiza el ultimo px verde de la columna anterior 
+            antfil-=1 
+            imagen[antfil, col-1] = GREEN
+        antfil= filVerde
+
+    cv2.imshow('Adelgazado inferior', imagen)
+    return imagen
 # Cargar imagen del electrocardiograma
 img = cv2.imread('IMG_test/images3.jpeg')
 
@@ -87,7 +108,8 @@ contour_img = cv2.imread('IMG/contorno.png', cv2.IMREAD_UNCHANGED)
 
 # Convertir la imagen a escala de grises
 #gray_contour = cv2.cvtColor(contour_img, cv2.COLOR_BGR2GRAY)
-gray_contour = cv2.cvtColor(slimUp(2,contour_img), cv2.COLOR_BGR2GRAY)#funcion adelgasar implementada
+gray_contour = cv2.cvtColor(slimDown(5,contour_img), cv2.COLOR_BGR2GRAY)#funcion adelgasar implementada
+#gray_contour = cv2.cvtColor(slimUp(2,contour_img), cv2.COLOR_BGR2GRAY)#funcion adelgasar implementada
 
 # Aplicar el algoritmo de detección de picos a la señal del electrocardiograma
 #peaks, _ = find_peaks(gray_contour.flatten(), height=50)
