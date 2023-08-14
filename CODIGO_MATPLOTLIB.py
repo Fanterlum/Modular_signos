@@ -49,7 +49,7 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Leer la imagen del contorno guardada
-contour_img = cv2.imread('contorno.png', cv2.IMREAD_UNCHANGED)
+contour_img = cv2.imread('IMG\contorno.png', cv2.IMREAD_UNCHANGED)
 
 # Convertir la imagen a RGB para ser compatible con Matplotlib
 contour_img_rgb = cv2.cvtColor(contour_img, cv2.COLOR_BGRA2RGBA)
