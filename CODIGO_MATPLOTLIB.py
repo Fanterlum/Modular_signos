@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Cargar imagen del electrocardiograma
-img = cv2.imread('IMG/electro1.JPG')
+img = cv2.imread('RECORTE_1.png')
 
 # Convertir imagen a escala de grises
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -36,7 +36,7 @@ contour_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint8)
 cv2.drawContours(contour_img, green_contours, -1, (0, 255, 0, 255), thickness=cv2.FILLED)
 
 # Guardar la imagen del contorno en un archivo con canal alfa
-cv2.imwrite('IMG\contorno.png', contour_img)
+cv2.imwrite('RECORTE_1.png', contour_img)
 
 # Mostrar imagen con contornos resaltados
 cv2.imshow('Contornos verdes', img)
@@ -49,7 +49,7 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Leer la imagen del contorno guardada
-contour_img = cv2.imread('IMG\contorno.png', cv2.IMREAD_UNCHANGED)
+contour_img = cv2.imread('RECORTE_1.png', cv2.IMREAD_UNCHANGED)
 
 # Define the color to search for (green)
 green = np.array([0, 255, 0, 255], dtype=np.uint8)
@@ -61,15 +61,41 @@ y_coords, x_coords = np.where(np.all(contour_img == green, axis=-1))
 print("X values:", x_coords)
 print("Y values:", y_coords)
 
+# Print the x and y coordinates
+print("X values:", x_coords)
+print("Y values:", y_coords)
+
+min_y = {}
+max_y = {}
+for x, y in zip(x_coords, y_coords):
+    if x not in min_y or y < min_y[x]:
+        min_y[x] = y
+    if x not in max_y or y > max_y[x]:
+        max_y[x] = y
+
+down_coords = [(x, y) for x, y in min_y.items()]
+top_coords = [(x, y) for x, y in max_y.items()]
+
+# Create new X and Y arrays with both the top and down coordinates
+new_x_coords = []
+new_y_coords = []
+for x in set(min_y.keys()) | set(max_y.keys()):
+    if x in min_y and x in max_y:
+        new_x_coords.append(x)
+        new_y_coords.append(min_y[x])
+        new_x_coords.append(x)
+        new_y_coords.append(max_y[x])
+
 # Create a scatter plot of the x and y values
 plt.scatter(x_coords, y_coords, s=1)
+
 # Invert the y-axis
 plt.gca().invert_yaxis()
 
-# Show the plot
+# Plot the new coordinates
+plt.plot(new_x_coords, new_y_coords, 'ro')
+plt.plot([x for x, y in down_coords], [y for x, y in down_coords], 'bo')
 plt.show()
-
-
 
 # Convertir la imagen a RGB para ser compatible con Matplotlib
 #contour_img_rgba = cv2.cvtColor(contour_img, cv2.COLOR_BGRA2RGBA)
