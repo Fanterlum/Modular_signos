@@ -84,18 +84,18 @@ first_point = (min(x_coords), min_y[min(x_coords)])
 final_point = (max(x_coords), max_y[max(x_coords)])
 
 #find the higher point between the first and the lower point
-higher_point = (lower_x_pos, max_y[lower_x_pos])
+QSignal = (lower_x_pos, max_y[lower_x_pos])
 # get the numer of x between the first and the lower point
 x_between = np.where((x_coords > first_point[0]) & (x_coords < lower_x_pos))
 
 # go x_between times to the right and get the y higher value coordinate 
 for i in range(x_between[0].shape[0]):
-    if y_coords[x_between[0][i]] > higher_point[1]:
-        higher_point = (x_coords[x_between[0][i]], y_coords[x_between[0][i]])
+    if y_coords[x_between[0][i]] > QSignal[1]:
+        QSignal = (x_coords[x_between[0][i]], y_coords[x_between[0][i]])
 
 
 # find the higher point between the lower and the final point not the start point
-higher_point2 = (lower_x_pos, max_y[lower_x_pos])
+QSignal2 = (lower_x_pos, max_y[lower_x_pos])
 
 # get the number of x between the lower and the final point
 x_between2 = np.where((x_coords > lower_x_pos) & (x_coords < final_point[0]))
@@ -108,9 +108,32 @@ x_between2_first_half = np.where((x_coords > lower_x_pos) & (x_coords < midpoint
 
 # go x_between2_first_half to the right and get the Y higher value coordinate
 for i in range(x_between2_first_half[0].shape[0]):
-    if y_coords[x_between2_first_half[0][i]] > higher_point2[1]:
-        higher_point2 = (x_coords[x_between2_first_half[0][i]], y_coords[x_between2_first_half[0][i]])
+    if y_coords[x_between2_first_half[0][i]] > QSignal2[1]:
+        QSignal2 = (x_coords[x_between2_first_half[0][i]], y_coords[x_between2_first_half[0][i]])
 
+
+# find the lower point betwwen QSignal2 and final_point
+lower_point_startQ = (QSignal2[0], max_y[QSignal2[0]])
+# get the number of x between the QSignal2 and the final point
+x_between2_second_half = np.where((x_coords > QSignal2[0]) & (x_coords < final_point[0]))
+#got to the right x_between2_second_half times and get the Y lower value coordinate
+for i in range(x_between2_second_half[0].shape[0]):
+    if y_coords[x_between2_second_half[0][i]] < lower_point_startQ[1]:
+        lower_point_startQ = (x_coords[x_between2_second_half[0][i]], y_coords[x_between2_second_half[0][i]])
+
+
+# find the lower point betwwen start point and QSignal coordiantes 
+lower_point_startP = (first_point[0], max_y[first_point[0]])
+# get the number of x between the start point and the QSignal and divide it by 2
+x_between3 = np.where((x_coords > first_point[0]) & (x_coords < QSignal[0]))
+midpoint2 = first_point[0] + (QSignal[0] - first_point[0]) // 2
+# get the number of x between the start point and the midpoint2
+x_between3_first_half = np.where((x_coords > first_point[0]) & (x_coords < midpoint2))
+
+#go to the right x_between3_first_half times and get the Y lower value coordinate
+for i in range(x_between3_first_half[0].shape[0]):
+    if y_coords[x_between3_first_half[0][i]] < lower_point_startP[1]:
+        lower_point_startP = (x_coords[x_between3_first_half[0][i]], y_coords[x_between3_first_half[0][i]])
 
 
 # Create a scatter plot of the x and y values
@@ -121,15 +144,12 @@ plt.gca().invert_yaxis()
 
 # Plot the first, lower, and final points
 plt.plot(first_point[0], first_point[1], 'ro', label='First')
-plt.plot(lower_x_pos, lower_y, 'go', label='Lower')
+plt.plot(lower_x_pos, lower_y, 'go', label='R')
 plt.plot(final_point[0], final_point[1], 'bo', label='Final')
-
-plt.plot(higher_point[0], higher_point[1], 'yo', label='Higher')
-plt.plot(higher_point2[0], higher_point2[1], 'yo', label='Higher2')
-
-
-print ("higher point: ", higher_point)
-
+plt.plot(QSignal[0], QSignal[1], 'ro', label='Q')
+plt.plot(QSignal2[0], QSignal2[1], 'yo', label='S')
+plt.plot(lower_point_startQ[0], lower_point_startQ[1], 'yo', label='T')
+plt.plot(lower_point_startP[0], lower_point_startP[1], 'ro', label='P')
 
 
 
