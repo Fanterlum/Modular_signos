@@ -61,10 +61,7 @@ y_coords, x_coords = np.where(np.all(contour_img == green, axis=-1))
 print("X values:", x_coords)
 print("Y values:", y_coords)
 
-# Print the x and y coordinates
-print("X values:", x_coords)
-print("Y values:", y_coords)
-
+# Find the min and max y values for each x value
 min_y = {}
 max_y = {}
 for x, y in zip(x_coords, y_coords):
@@ -73,18 +70,18 @@ for x, y in zip(x_coords, y_coords):
     if x not in max_y or y > max_y[x]:
         max_y[x] = y
 
-down_coords = [(x, y) for x, y in min_y.items()]
-top_coords = [(x, y) for x, y in max_y.items()]
+# Find the position of the Y lower coordinate in the y_coords array
+lower_y = min(y_coords)
+lower_y_pos = np.where(y_coords == lower_y)[0][0]
 
-# Create new X and Y arrays with both the top and down coordinates
-new_x_coords = []
-new_y_coords = []
-for x in set(min_y.keys()) | set(max_y.keys()):
-    if x in min_y and x in max_y:
-        new_x_coords.append(x)
-        new_y_coords.append(min_y[x])
-        new_x_coords.append(x)
-        new_y_coords.append(max_y[x])
+# Find the X position of the Y lower coordinate
+lower_x_pos = x_coords[lower_y_pos]
+
+# Find the first point
+first_point = (min(x_coords), min_y[min(x_coords)])
+
+# Find the final point
+final_point = (max(x_coords), max_y[max(x_coords)])
 
 # Create a scatter plot of the x and y values
 plt.scatter(x_coords, y_coords, s=1)
@@ -92,18 +89,13 @@ plt.scatter(x_coords, y_coords, s=1)
 # Invert the y-axis
 plt.gca().invert_yaxis()
 
-# Plot the new coordinates
-plt.plot(new_x_coords, new_y_coords, 'ro')
-plt.plot([x for x, y in down_coords], [y for x, y in down_coords], 'bo')
+# Plot the first, lower, and final points
+plt.plot(first_point[0], first_point[1], 'ro', label='First')
+plt.plot(lower_x_pos, lower_y, 'go', label='Lower')
+plt.plot(final_point[0], final_point[1], 'bo', label='Final')
+
+# Add a legend
+plt.legend()
+
+# Show the plot
 plt.show()
-
-# Convertir la imagen a RGB para ser compatible con Matplotlib
-#contour_img_rgba = cv2.cvtColor(contour_img, cv2.COLOR_BGRA2RGBA)
-
-
-
-
-# Mostrar la imagen del contorno utilizando Matplotlib
-#plt.imshow(contour_img_rgba)
-#plt.axis('on')
-#plt.show()
