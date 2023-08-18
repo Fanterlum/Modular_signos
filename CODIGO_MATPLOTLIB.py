@@ -71,17 +71,28 @@ for x, y in zip(x_coords, y_coords):
         max_y[x] = y
 
 # Find the position of the Y lower coordinate in the y_coords array
-lower_y = min(y_coords)
+lower_y = min(y_coords) #coordenada y mas baja
 lower_y_pos = np.where(y_coords == lower_y)[0][0]
 
 # Find the X position of the Y lower coordinate
-lower_x_pos = x_coords[lower_y_pos]
+lower_x_pos = x_coords[lower_y_pos] #coordenada x de la coordenada y mas baja
 
 # Find the first point
 first_point = (min(x_coords), min_y[min(x_coords)])
 
 # Find the final point
 final_point = (max(x_coords), max_y[max(x_coords)])
+
+#find the higher point between the first and the lower point
+higher_point = (lower_x_pos, max_y[lower_x_pos])
+# get the numer of x between the first and the lower point
+x_between = np.where((x_coords > first_point[0]) & (x_coords < lower_x_pos))
+
+# go x_between times to the right and get the y higher value coordinate 
+for i in range(x_between[0].shape[0]):
+    if y_coords[x_between[0][i]] > higher_point[1]:
+        higher_point = (x_coords[x_between[0][i]], y_coords[x_between[0][i]])
+
 
 # Create a scatter plot of the x and y values
 plt.scatter(x_coords, y_coords, s=1)
@@ -93,6 +104,14 @@ plt.gca().invert_yaxis()
 plt.plot(first_point[0], first_point[1], 'ro', label='First')
 plt.plot(lower_x_pos, lower_y, 'go', label='Lower')
 plt.plot(final_point[0], final_point[1], 'bo', label='Final')
+
+plt.plot(higher_point[0], higher_point[1], 'yo', label='Higher')
+
+
+print ("higher point: ", higher_point)
+
+
+
 
 # Add a legend
 plt.legend()
