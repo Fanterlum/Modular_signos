@@ -153,10 +153,29 @@ plt.plot(QSignal2[0], QSignal2[1], 'go', label='S')
 plt.plot(lower_point_startQ[0], lower_point_startQ[1], 'yo', label='T')
 plt.plot(lower_point_startP[0], lower_point_startP[1], 'mo', label='P')
 
+# Your existing code here...
 
+# Create a dictionary to store the coordinates
+coordinates = {
+    'first_pointx': int(first_point[0]),
+    'first_pointy': int(first_point[1]),
+    'lower_pointx': int(lower_x_pos),
+    'lower_pointy': int(lower_y),
+    'final_pointx': int(final_point[0]),
+    'final_pointy': int(final_point[1]),
+    'QSignalx': int(QSignal[0]),
+    'QSignaly': int(QSignal[1]),
+    'SSignal2x': int(QSignal2[0]),
+    'SSignal2y': int(QSignal2[1]),
+    'lower_point_startQx': int(lower_point_startQ[0]),
+    'lower_point_startQy': int(lower_point_startQ[1]),
+    'lower_point_startPx': int(lower_point_startP[0]),
+    'lower_point_startPy': int(lower_point_startP[1])
+}
+# Save the coordinates to a JSON file
 
-
-
+with open('coordinates.json', 'w') as f:
+    json.dump(coordinates, f)
 
 
 # Add a legend
