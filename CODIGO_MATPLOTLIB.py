@@ -51,14 +51,14 @@ for image_file in image_files:
     cv2.imwrite(os.path.join(image_dir, image_file), contour_img)
 
     # Mostrar imagen con contornos resaltados
-    cv2.imshow('Contornos verdes', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    #cv2.imshow('Contornos verdes', img)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
 
     # Mostrar la imagen contorno.png utilizando OpenCV
-    cv2.imshow('Contorno', contour_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    #cv2.imshow('Contorno', contour_img)
+    ##cv2.waitKey(0)
+    #cv2.destroyAllWindows()
 
     # Leer la imagen del contorno guardada
     contour_img = cv2.imread(os.path.join(image_dir, image_file), cv2.IMREAD_UNCHANGED)
@@ -155,13 +155,13 @@ for image_file in image_files:
     plt.gca().invert_yaxis()
 
     # Plot the first, lower, and final points
-    plt.plot(first_point[0], first_point[1], 'co', label='First')
-    plt.plot(lower_x_pos, lower_y, 'ko', label='R')
-    plt.plot(final_point[0], final_point[1], 'bo', label='Final')
-    plt.plot(QSignal[0], QSignal[1], 'ro', label='Q')
-    plt.plot(QSignal2[0], QSignal2[1], 'go', label='S')
-    plt.plot(lower_point_startQ[0], lower_point_startQ[1], 'yo', label='T')
-    plt.plot(lower_point_startP[0], lower_point_startP[1], 'mo', label='P')
+    #plt.plot(first_point[0], first_point[1], 'co', label='First')
+    #plt.plot(lower_x_pos, lower_y, 'ko', label='R')
+    #plt.plot(final_point[0], final_point[1], 'bo', label='Final')
+    ##plt.plot(QSignal[0], QSignal[1], 'ro', label='Q')
+    #plt.plot(QSignal2[0], QSignal2[1], 'go', label='S')
+    #plt.plot(lower_point_startQ[0], lower_point_startQ[1], 'yo', label='T')
+    #plt.plot(lower_point_startP[0], lower_point_startP[1], 'mo', label='P')
 
     # Your existing code here...
 
@@ -192,7 +192,7 @@ for image_file in image_files:
 
 
     # Add a legend
-    plt.legend()
+    #plt.legend()
 
     # Show the plot
-    plt.show()
+    #plt.show()
