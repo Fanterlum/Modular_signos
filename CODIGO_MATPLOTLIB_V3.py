@@ -70,7 +70,7 @@ cv2.imwrite('IMG\RECORTE_3.png', filtered_mask)
 #------------------------------ CODIGO VICENTE -------------------------------------------
 
 # Leer la imagen del contorno guardada
-#contour_img = cv2.imread('IMG/RECORTE_1.png', cv2.IMREAD_UNCHANGED)
+contour_img = cv2.imread('IMG/RECORTE_3.png', cv2.IMREAD_UNCHANGED)
 
 # Define the color to search for (green)
 green = np.array([0, 255, 0, 255], dtype=np.uint8)
@@ -186,10 +186,10 @@ coordinates = {
     'S_SIGNAL_Y': int(QSignal2[1]),
     #'lower_point_startQx': int(lower_point_startQ[0]),
     #'lower_point_startQy': int(lower_point_startQ[1]),
-    'TSignalx': int(lower_point_startQ[0]),
-    'TSignaly': int(lower_point_startQ[1]),
-    'PSignalx': int(lower_point_startP[0]),
-    'PSignaly': int(lower_point_startP[1])
+    'T_SIGNAL_X': int(lower_point_startQ[0]),
+    'T_SIGNAL_Y': int(lower_point_startQ[1]),
+    'P_SIGNAL_X': int(lower_point_startP[0]),
+    'P_SIGNAL_Y': int(lower_point_startP[1])
 }
 # Save the coordinates to a JSON file
 
