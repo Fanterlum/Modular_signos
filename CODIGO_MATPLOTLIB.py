@@ -1,9 +1,11 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+
 
 # Cargar imagen del electrocardiograma
-img = cv2.imread('RECORTE_1.png')
+img = cv2.imread('RECORTE_3.png')
 
 # Convertir imagen a escala de grises
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -36,7 +38,7 @@ contour_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint8)
 cv2.drawContours(contour_img, green_contours, -1, (0, 255, 0, 255), thickness=cv2.FILLED)
 
 # Guardar la imagen del contorno en un archivo con canal alfa
-cv2.imwrite('RECORTE_1.png', contour_img)
+cv2.imwrite('RECORTE_3.png', contour_img)
 
 # Mostrar imagen con contornos resaltados
 cv2.imshow('Contornos verdes', img)
@@ -49,7 +51,7 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Leer la imagen del contorno guardada
-contour_img = cv2.imread('RECORTE_1.png', cv2.IMREAD_UNCHANGED)
+contour_img = cv2.imread('RECORTE_3.png', cv2.IMREAD_UNCHANGED)
 
 # Define the color to search for (green)
 green = np.array([0, 255, 0, 255], dtype=np.uint8)
@@ -143,13 +145,17 @@ plt.scatter(x_coords, y_coords, s=1)
 plt.gca().invert_yaxis()
 
 # Plot the first, lower, and final points
-plt.plot(first_point[0], first_point[1], 'ro', label='First')
-plt.plot(lower_x_pos, lower_y, 'go', label='R')
+plt.plot(first_point[0], first_point[1], 'co', label='First')
+plt.plot(lower_x_pos, lower_y, 'ko', label='R')
 plt.plot(final_point[0], final_point[1], 'bo', label='Final')
 plt.plot(QSignal[0], QSignal[1], 'ro', label='Q')
-plt.plot(QSignal2[0], QSignal2[1], 'yo', label='S')
+plt.plot(QSignal2[0], QSignal2[1], 'go', label='S')
 plt.plot(lower_point_startQ[0], lower_point_startQ[1], 'yo', label='T')
-plt.plot(lower_point_startP[0], lower_point_startP[1], 'ro', label='P')
+plt.plot(lower_point_startP[0], lower_point_startP[1], 'mo', label='P')
+
+
+
+
 
 
 
