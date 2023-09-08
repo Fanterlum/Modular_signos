@@ -22,12 +22,18 @@ def endPoint_http():
     login= Login.query.filter_by(password = request.args.get( 'password' )).first()
     if not login is None :
         user = User.query.filter_by(id = login.ID_user).first()
-        print(user.Login[0].email)
-        print(user.Historial)
-        print(user.Ondas)
-        print(user.Doctor)
-        print(user.Pacientes)
-        print(user.Familiares)
+        if(request.args.get( 'email' )):
+            return user.Login[0].email #encriptar
+        elif(request.args.get( 'historial' )):
+            return user.Historial #encriptar json
+        elif(request.args.get( 'ondas' )):
+            return user.Ondas #encriptar json
+        elif(request.args.get( 'Doctor' )):
+            return user.Doctor #encriptar
+        elif(request.args.get( 'Pacienta' )):
+            return user.Pacientes #encriptar json
+        elif(request.args.get( 'Familiares' )):
+            return user.Familiares#encriptar json
         print(request)#control de petición
         print(request.args)#control parametros de petición 
         print(request.args.get('P1'))#control parametro1 de petición 

@@ -9,11 +9,11 @@ db = SQLAlchemy()
 
 class User(db.Model):
     __tablename__ = "User"
-    id = db.Column(db.String(10),unique = True,nullable=False)
+    id = db.Column(db.Integer,unique = True, primary_key=True)
     username = db.Column(db.String(50),unique = True,nullable=False)
-    apellidos = None
-    tipo= None
-    fechaNacimiento=None
+    apellidos = db.Column(db.String(50),unique = True,nullable=False)
+    tipo= db.Column(db.Integer,unique = False, primary_key=True)
+    fechaNacimiento=db.Column(db.DateTime,default=datetime.datetime.now)
 
     Login=relationship("Login")
     Historial=relationship("Historial")
@@ -46,10 +46,8 @@ class Login(db.Model):
 class Historial(db.Model):
     __tablename__ = "Historial"
     ID_user=db.Column(db.Integer,ForeignKey('User.id'))
-    fecha = None
-    hora = None
-    status = None
-
+    fecha = db.Column(db.DateTime,default=datetime.datetime.now)
+    
 class Onda(db.Model):
     __tablename__ = "Onda"
     ID_user=db.Column(db.Integer,ForeignKey('User.id'))
@@ -58,15 +56,14 @@ class Onda(db.Model):
 class Doctor(db.Model):
     __tablename__ = "Doctor"
     ID_user=db.Column(db.Integer,ForeignKey('User.id'))
-    cedula_profecional = None
-    especialidad = None
+    cedula_profecional = db.Column(db.String(30),nullable=False)
+    especialidad = db.Column(db.String(30),nullable=False)
     Pacientes=relationship("Paciente")
 
 class Paciente(db.Model):
     __tablename__ = "Paciente"
     ID_user=db.Column(db.Integer,ForeignKey('User.id'))
     cedulaDoc=db.Column(db.Integer,ForeignKey('Doctor.cedula_profecional'))
-
     Familiares=relationship("Familiar")
 
 class Familiar(db.Model):
