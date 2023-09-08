@@ -1,4 +1,7 @@
-import psycopg2
+#import psycopg2 as gdb # gestor para postgresql :)
+import pymysql as gdb # gestor para sql :)
+#import sqlite3 as gdb # gestor para sqlite :)
+
 # Configura la conexión a la base de datos
 DATABASE="nombre_de_la_base_de_datos"
 USER="usuario"
@@ -19,7 +22,7 @@ class DatabaseManager:
 
     def dbConn(self,database,user,password,host,port):
         if self.conn is None:
-            self.conn = psycopg2.connect(
+            self.conn = gdb.connect(
                 database=database,
                 user=user,
                 password=password,
@@ -61,7 +64,7 @@ class DatabaseManager:
             #cursor.execute(f"INSERT INTO {tabla} (nombre, edad) VALUES (%s, %s)", (name, age))
             self.conn.commit()
             self.crudLog.append("Registro creado con éxito.")
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, gdb.Error) as error:
             self.crudLog.append(f"Error al crear el registro: {error}")
 
     # Función para leer todos los registros
@@ -80,7 +83,7 @@ class DatabaseManager:
                 #print("--------------")
                 registros.append(registro)
             self.crudLog.append(f"Registros consulta en la tabla: {tabla}")
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, gdb.Error) as error:
             self.crudLog.append(f"Error al leer los registros: {error}")
         return registros
 
@@ -93,7 +96,7 @@ class DatabaseManager:
             #cursor.execute(f"UPDATE {tabla} SET nombre = {new_name}, edad = {new_age} WHERE {nameCampo} = {buscarVal}")
             self.conn.commit()
             self.crudLog.append("Registro actualizado con éxito.")
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, gdb.Error) as error:
             self.crudLog.append(f"Error al actualizar el registro: {error}" )
 
     # Función para eliminar un registro por ID
@@ -103,7 +106,7 @@ class DatabaseManager:
             cursor.execute(f"DELETE FROM {tabla} WHERE id = {id}")
             self.conn.commit()
             self.crudLog.append("Registro eliminado con éxito.")
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, gdb.Error) as error:
             self.crudLog.append(f"Error al eliminar el registro: {error}")
 
     # Función para leer todos los campos
@@ -114,7 +117,7 @@ class DatabaseManager:
             cursor.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{tabla}'")
             campos = cursor.fetchall()
             self.crudLog.append(f"Campos consulta en la tabla: {tabla}")
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, gdb.Error) as error:
             self.crudLog.append(f"Error al leer los campos: {error}")
         return campos
     
@@ -125,7 +128,7 @@ class DatabaseManager:
             cursor.execute(query)
             self.conn.commit()
             self.crudLog.append("query y commit ejecutado con éxito.")
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, gdb.Error) as error:
             self.crudLog.append(f"Error al ejecutar query: {error}")
 
     # Función para ejecutar query y retornar los datos
@@ -136,7 +139,7 @@ class DatabaseManager:
             cursor.execute(query)
             data = cursor.fetchall()
             self.crudLog.append("query y consulta de datos ejecutado con éxito.")
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, gdb.Error) as error:
             self.crudLog.append(f"Error al leer los datos: {error}")
         return data
 
