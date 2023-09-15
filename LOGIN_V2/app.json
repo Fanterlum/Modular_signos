@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "VITAL_SIGNS_VISION",
+    "slug": "VITAL_SIGNS_VISION",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/LOGO.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/LOGO2.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#B4E2E5"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
