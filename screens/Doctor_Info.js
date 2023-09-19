@@ -8,50 +8,48 @@ import TextAssigner from '../components/TextAssigner';
 
 //Los estilos del paciente
 import { styles } from '../Styles/Patient-Doctor/styles'; // Ajusta la ruta según la ubicación del archivo
-//Se importa el chatbot
-import ButtonChatbox from "../Chatbot/Components/ButtonChatbox";
 
-const Patient_Info = () => {
+//Import al chatbot
+
+import ButtonChatbox from '../Chatbot/Components/ButtonChatbox';
+const Doctor_Info = () => {
   const [nombre, setNombre] = useState('Vicente'); // Variable para el nombre
   const [apellido, setApellido] = useState('González Garcia'); // Variable para el apellido
-  const [edad, setEdad] = useState('22'); // Variable para la edad
-  const [Doctor, setDoctor] = useState('Ivan Gonzalez'); // Variable para la edad
-
+  const [cedula, setCedula] = useState('218694551'); // Variable para la edad
+  const [especialidad, setEspecialidad] = useState('Neumologo');
   //Aqui van los estados del paciente
   const [ActualState, setActualState] = useState(0); //ESTADO ACTUAL
   const [FutureState, setFutureStare] = useState(1); //Estado futuro
 
   //Aqui va la ruta o la peticion a la imagen del paciente
-  const imageUrl = require('../assets/Sample/Patient.jpeg');
+  const doctorPhoto = require('../assets/Sample/Doctor.jpeg');
+  const botPhoto = require('../assets/bot-icon.png');
+  const handlePress = () => {
+    // Manejar la acción cuando se presiona el botón
+    console.log('El botón fue presionado');
+  };
 
   return (
     <View style={styles.MainContainer}>
       <View style={styles.photoContainer}>
-        <Text style={styles.titleText}>Datos del paciente:</Text>
-        <Image source={imageUrl} style={styles.PatientPhoto}
+        <Text style={styles.titleText}>Datos del doctor:</Text>
+        <Image source={doctorPhoto} style={styles.PatientPhoto}
                 resizeMode="contain" // Controla cómo se ajusta la imagen
                 />
       </View>
       <View style={styles.infoContainer}>
         <Text style={styles.DataText2}>Nombre: {nombre}</Text>
         <Text style={styles.DataText}>Apellido: {apellido}</Text>
-        <Text style={styles.DataText}>Edad: {edad}</Text>
-        <Text style={styles.DataText}>Doctor a cargo: {Doctor}</Text>
-
+        <Text style={styles.DataText}>Especialidad: {especialidad}</Text>
+        <Text style={styles.DataText}>Cédula profesional: {cedula}</Text>
       </View>
       <View style={styles.Patient_StatusContainer}>
-      <View style={[styles.estados, { backgroundColor: ColorAssigner({ numero: ActualState }) }]}>
-        <Text style={styles.StatusText}>Status Actual: {TextAssigner({ numero: ActualState })}</Text>
-      </View>
-      <View style={[styles.estados, { backgroundColor: ColorAssigner({ numero: FutureState }) }]}>
-        <Text style={styles.StatusText}>Status Futuro: {TextAssigner({ numero: FutureState })}</Text>
-      </View>
       </View>
       <View style={styles.chatbotContainer}>
-        <ButtonChatbox></ButtonChatbox>
+      <ButtonChatbox></ButtonChatbox>
       </View>
     </View>
   )
 }
 
-export default Patient_Info
+export default Doctor_Info

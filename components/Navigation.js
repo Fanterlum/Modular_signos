@@ -3,26 +3,69 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View, Text, Button } from 'react-native';
-
-
+import CustomDrawer from './CustomDrawer';
+import Icon from 'react-native-vector-icons/Ionicons';
 //Screens used in the navigation
-import Alert_Settings from "../screens/Alert_Settings";
+import Dashboard from "../screens/Dashboard";
 import Patient_Info from "../screens/Patient_Info";
+import Doctor_Info from '../screens/Doctor_Info';
+import Paciente_List from '../screens/Patient_List';
+
 const Drawer = createDrawerNavigator();
 
 const Navigation = () => {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Paciente" screenOptions={{
+    <>
+      <Drawer.Navigator drawerContent= {props=> <CustomDrawer {...props}/>} initialRouteName="Paciente" screenOptions={{
         headerTitle: '',
+        backgroundColor: "#45C3CC",
+        drawerActiveBackgroundColor: "#45C3CC",
+        drawerActiveTintColor: "#fff",
+        drawerInactiveTintColor: "#333",
+        drawerStyle: {
+          backgroundColor: '#FFFF',
+        },
+        drawerLabelStyle:{
+          fontWeight: "bold",
+          fontSize: 18,
+        },
         headerStyle: {
           backgroundColor: '#45C3CC', // Cambiar el color de fondo del encabezado
         },
-      }}>
-        <Drawer.Screen name="Paciente" component={Patient_Info} />
-        <Drawer.Screen name="Alertas" component={Alert_Settings} />
+      }}
+      >
+        <Drawer.Screen name="Dashboard" component={Dashboard} options={{
+          drawerIcon: (color) => (
+            <Icon name='home-outline' size={26} color ={color}></Icon>
+          )
+        }
+        }/>
+        <Drawer.Screen name="Paciente" component={Patient_Info} options={{
+          drawerIcon: (color) => (
+            <Icon name='person-outline' size={26} color ={"black"}></Icon>
+          )
+        }
+        }/>
+        <Drawer.Screen name="Doctor" component={Doctor_Info} options={{
+          drawerIcon: (color) => (
+            <Icon name='medical-outline' size={26} color ={color}></Icon>
+          ),
+        }
+        }/>
+        <Drawer.Screen name="Lista de pacientes" component={Paciente_List} options={{
+          drawerIcon: (color) => (
+            <Icon name='list-outline' size={26} color ={color}></Icon>
+          ),
+        }
+        }/>
+        <Drawer.Screen name="Settings" component={Dashboard} options={{
+          drawerIcon: (color) => (
+            <Icon name='settings-outline' size={26} color ={color}></Icon>
+          )
+        }
+        }/>
       </Drawer.Navigator>
-    </NavigationContainer>
+    </>
   );
 };
 
