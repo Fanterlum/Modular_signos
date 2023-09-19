@@ -1,18 +1,10 @@
-#Se importa configuraciones Json
-import json
 #Se importa de flask los objetos que ocuparemos 
-from flask import Flask
-from flask import request
+from flask import Flask, request, jsonify
 #Se importa configoraciones de desarrollo 
 from config import DevConfig 
 #Se importa configuraciones de la base de datos 
 #from BDManager import DatabaseManager as db_CRUD
-from models import db
-from models import User
-from models import Login
-from models import Paciente
-from models import Doctor
-from models import Familiar
+from models import db, User, Login, Paciente, Doctor, Familiar
 #Se importa configuraciones de la base de datos y comunicaciones
 #from Comunicacion.Connections import RPC as epRPC
 #se declara un gestor de Base de datos mediante RPC
@@ -21,6 +13,12 @@ from models import Familiar
 #se inicializa la API 
 app=Flask(__name__) 
 app.config.from_object(DevConfig)#se agrega la configuracion
+@app.route('/')#indicamos que es la ruta raíz 
+def index():
+    return "Endpoint"
+@app.route('/test')#indicamos que es la ruta raíz 
+def testjson():
+    return jsonify(request.args.to_dict())
 def http_Delete():
     login= Login.query.filter_by(email = request.args.get( 'email' )).first()
     if not login is None and login.checkPassword(request.args.get( 'Password' )):
@@ -99,29 +97,13 @@ def http_Read():
         user = User.query.filter_by(id = login.ID_user).first()
 
         if(request.args.get( 'user' )):
-            return json.dumps(
-                user.to_dict(), 
-                sort_keys=True, 
-                indent=4
-            )
+            return jsonify(user.to_dict())
         elif(request.args.get( 'Pacientes' )) and user.tipo == 0 :
-            return json.dumps(
-                user.userPaciente.to_dict() , 
-                sort_keys=True, 
-                indent=4
-            )
+            return jsonify(user.userPaciente.to_dict())
         elif(request.args.get( 'Doctor' ))and user.tipo == 1:
-            return json.dumps(
-                user.userDoctor.to_dict() , 
-                sort_keys=True, 
-                indent=4
-            )
+            return jsonify(user.userDoctor.to_dict() )
         elif(request.args.get( 'Familiares' ))and user.tipo == 2:
-            return json.dumps(
-                user.userFamiliar.to_dict(), 
-                sort_keys=True, 
-                indent=4
-            )
+            return jsonify(user.userFamiliar.to_dict())
 
     else:
         pass
