@@ -60,10 +60,10 @@ class User(db.Model):
     
 class Login(db.Model):
     __tablename__ = "Login"
-    #id = db.Column(db.Integer,unique = True, primary_key=True)
+    id = db.Column(db.Integer,unique = True, primary_key=True)
     email = db.Column(db.String(30),nullable=False)
     password = db.Column(db.String(66),nullable=False)
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True)
 
     @property
     def Email(self,email):
@@ -100,8 +100,8 @@ class Doctor(db.Model):
 
 class Paciente(db.Model):
     __tablename__ = "Paciente"
-    #id = db.Column(db.Integer,unique = True, primary_key=True)
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'), primary_key=True,unique = True)
+    id = db.Column(db.Integer,unique = True, primary_key=True)
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'), unique = True)
     cedulaDoc=db.Column(db.String(30),ForeignKey('Doctor.cedula_profecional'))
     Familiares=relationship("Familiar")
 
@@ -127,7 +127,8 @@ class Paciente(db.Model):
             return "Sin doctor"
 class Familiar(db.Model):
     __tablename__ = "Familiar"
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),nullable=False,unique = True, primary_key=True)
+    id = db.Column(db.Integer,unique = True, primary_key=True)
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),nullable=False,unique = True)
     ID_Paciente=db.Column(db.Integer,ForeignKey('Paciente.ID_user'),nullable=True)
     ID_Doctor=db.Column(db.Integer,ForeignKey('Paciente.cedulaDoc'),nullable=True)
     #Paciente=relationship("Paciente")
