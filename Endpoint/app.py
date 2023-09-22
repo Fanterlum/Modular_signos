@@ -66,11 +66,17 @@ def http_Create():
         tipo=request.args.get( 'tipo' ),
         fechaNacimiento=request.args.get( 'fechaNacimiento' )
     )
-    login = Login()
+    db.session.add(user)
+    db.session.commit()
+    login = Login(user.id)
+    print(user.id)
+    print(request.args.get( 'Email' ))
+    print(request.args.get( 'Email' ))
     login.setEmail(request.args.get( 'Email' ))
     login.setPassword(request.args.get( 'Password' ))
-    db.session.add(user)
+    
     db.session.add(login)
+    return 'okey'
     
 
     if user.tipo == 0 :
@@ -86,6 +92,7 @@ def http_Create():
         db.session.add(fam)
         
     db.session.commit()
+    return 
 
 def http_Read():
     print(request)#control de petición

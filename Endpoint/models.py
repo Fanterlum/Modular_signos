@@ -15,10 +15,10 @@ class User(db.Model):
     tipo= db.Column(db.Integer,unique = False,nullable=False)
     fechaNacimiento=db.Column(db.DateTime,default=datetime.datetime.now)
 
-    Login=relationship("Login")
-    Doctor_tipo=relationship("Doctor")
-    Paciente_tipo=relationship("Paciente")
-    Familiar_tipo=relationship("Familiar")
+    Login=relationship("Login", back_populates="parentUser")
+    Doctor_tipo=relationship("Doctor", back_populates="parentUser")
+    Paciente_tipo=relationship("Paciente", back_populates="parentUser")
+    Familiar_tipo=relationship("Familiar", back_populates="parentUser")
 
     @property
     def userPaciente(self):
@@ -62,17 +62,21 @@ class Login(db.Model):
     __tablename__ = "Login"
     id = db.Column(db.Integer,unique = True, primary_key=True)
     email = db.Column(db.String(30),nullable=False)
-    password = db.Column(db.String(66),nullable=False)
+    password = db.Column(db.String(150),nullable=False)
     ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True)
-
+    parentUser = relationship("User", back_populates="Login")
+    
+    def __init__(self,ID_user ):
+        self.ID_user=ID_user
     @property
-    def Email(self,email):
-        self.email=email
     def Email(self):
         return self.email
-    
+    def setEmail(self,email):
+        self.email=email 
     def setPassword(self,password):
-        self.passwordl=generate_password_hash(password)
+        print(generate_password_hash(password))
+        print(len(generate_password_hash(password)))
+        self.password=generate_password_hash(password)
     def checkPassword(self,password):
         return check_password_hash(self.password,password)
     
@@ -80,6 +84,7 @@ class Doctor(db.Model):
     __tablename__ = "Doctor"
     cedula_profecional = db.Column(db.String(30),nullable=False,unique = True, primary_key=True)
     ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True)
+    parentUser = relationship("User", back_populates="Doctor_tipo")
     especialidad = db.Column(db.String(30),nullable=False)
     Pacientes=relationship("Paciente")
     
@@ -101,9 +106,10 @@ class Doctor(db.Model):
 class Paciente(db.Model):
     __tablename__ = "Paciente"
     id = db.Column(db.Integer,unique = True, primary_key=True)
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'), unique = True)
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True)
+    parentUser = relationship("User", back_populates="Paciente_tipo")
     cedulaDoc=db.Column(db.String(30),ForeignKey('Doctor.cedula_profecional'))
-    Familiares=relationship("Familiar")
+    #Familiares=relationship("Familiar")
 
     def __init__(self,ID_user) -> None:
         self.ID_user=ID_user
@@ -129,8 +135,9 @@ class Familiar(db.Model):
     __tablename__ = "Familiar"
     id = db.Column(db.Integer,unique = True, primary_key=True)
     ID_user=db.Column(db.Integer,ForeignKey('User.id'),nullable=False,unique = True)
-    ID_Paciente=db.Column(db.Integer,ForeignKey('Paciente.ID_user'),nullable=True)
-    ID_Doctor=db.Column(db.Integer,ForeignKey('Paciente.cedulaDoc'),nullable=True)
+    parentUser = relationship("User", back_populates="Familiar_tipo")
+    '''ID_Paciente=db.Column(db.Integer,ForeignKey('Paciente.ID_user'),nullable=True)
+    ID_Doctor=db.Column(db.Integer,ForeignKey('Paciente.cedulaDoc'),nullable=True)'''
     #Paciente=relationship("Paciente")
 
     def __init__(self,ID_user) -> None:
