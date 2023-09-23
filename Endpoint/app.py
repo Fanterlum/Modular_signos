@@ -13,12 +13,44 @@ from models import db, User, Login, Paciente, Doctor, Familiar
 #se inicializa la API 
 app=Flask(__name__) 
 app.config.from_object(DevConfig)#se agrega la configuracion
+
 @app.route('/')#indicamos que es la ruta raíz 
 def index():
     return "Endpoint"
+
 @app.route('/test')#indicamos que es la ruta raíz 
 def testjson():
     return jsonify(request.args.to_dict())
+@app.route('/user/<id>')#indicamos que es la ruta raíz 
+def bRead(id):
+    user = User.query.filter_by(id = id).first()
+
+    if user:
+        return jsonify(user.to_dict())
+    else:
+        return jsonify({'id':id})
+    
+@app.route('/userDele/<id>')#indicamos que es la ruta raíz 
+def bDele(id):
+    login= Login.query.filter_by(ID_user = id).first()
+    user = User.query.filter_by(id = id).first()
+    if user:
+        if user.Paciente_tipo and user.tipo == 0 :
+            db.session.delete(user.Paciente_tipo[0])
+        elif user.Doctor_tipo and user.tipo == 1:
+            db.session.delete(user.Doctor_tipo[0])
+        elif user.Familiar_tipo and user.tipo == 2:
+            db.session.delete(user.Familiar_tipo[0])
+        db.session.delete(user)
+    if login :
+        db.session.delete(login)
+
+    db.session.commit()
+    return jsonify({'id':id})
+@app.route('/userUpdate/<id>')#indicamos que es la ruta raíz 
+def bUpdate(id):
+    return jsonify({'id':id})
+
 def http_Delete():
     login= Login.query.filter_by(email = request.args.get( 'email' )).first()
     if not login is None and login.checkPassword(request.args.get( 'Password' )):
@@ -68,6 +100,7 @@ def http_Create():
     )
     db.session.add(user)
     db.session.commit()
+
     login = Login(user.id)
     print(user.id)
     print(request.args.get( 'Email' ))
@@ -76,8 +109,6 @@ def http_Create():
     login.setPassword(request.args.get( 'Password' ))
     
     db.session.add(login)
-    return 'okey'
-    
 
     if user.tipo == 0 :
         paciente=Paciente(user.id)
@@ -92,34 +123,58 @@ def http_Create():
         db.session.add(fam)
         
     db.session.commit()
-    return 
+    return jsonify({'result':'okey'}) 
 
 def http_Read():
-    print(request)#control de petición
+    '''print(request)#control de petición
     print(request.args)#control parametros de petición 
-    print(request.args.get('P1'))#control parametro1 de petición 
+    print(request.args.get('P1'))#control parametro1 de petición '''
     #busqueda en la base de datos
     login= Login.query.filter_by(email = request.args.get( 'email' )).first()
     if not login is None and login.checkPassword(request.args.get( 'Password' )):
         user = User.query.filter_by(id = login.ID_user).first()
-
-        if(request.args.get( 'user' )):
-            return jsonify(user.to_dict())
-        elif(request.args.get( 'Pacientes' )) and user.tipo == 0 :
-            return jsonify(user.userPaciente.to_dict())
-        elif(request.args.get( 'Doctor' ))and user.tipo == 1:
-            return jsonify(user.userDoctor.to_dict() )
-        elif(request.args.get( 'Familiares' ))and user.tipo == 2:
-            return jsonify(user.userFamiliar.to_dict())
-
-    else:
-        pass
-    
-    return #encriptar
+        print(user.Doctor_tipo)
+        if user.Paciente_tipo and user.tipo == 0 :
+            return jsonify(user.Paciente_tipo[0].to_dict())
+        elif user.Doctor_tipo and user.tipo == 1:
+            return jsonify(user.Doctor_tipo[0].to_dict() )
+        elif user.Familiar_tipo and user.tipo == 2:
+            return jsonify(user.Familiar_tipo[0].to_dict())
+    return jsonify({'user':None})
 '''elif(request.args.get( 'historial' )):
             return user.Historial #encriptar json
         elif(request.args.get( 'ondas' )):
             return user.Ondas #encriptar json'''
+def bLogin():
+    login= Login.query.filter_by(email = request.args.get( 'email' )).first()
+    if not login is None and login.checkPassword(request.args.get( 'Password' )):
+        user = User.query.filter_by(id = login.ID_user).first()
+
+        if user:
+            return jsonify(
+                {
+                    'id':user.id,
+                    'error':'Not error',
+                    'logged':True
+                }
+            )
+        else:
+            return jsonify(
+                {
+                    'id':None,
+                    'error':'Not user',
+                    'logged':False
+                }
+            )
+    else:
+        return jsonify(
+            {
+                'id':None,
+                'error':'password error',
+                'logged':False
+            }
+        )
+
 if __name__=='__main__': 
     db.init_app(app)#inicia el gestor db de la api
     
@@ -129,5 +184,6 @@ if __name__=='__main__':
         app.add_url_rule('/UpdtData',view_func=http_Update)
         app.add_url_rule('/CrteData',view_func=http_Create)
         app.add_url_rule('/ReadData',view_func=http_Read)
+        app.add_url_rule('/BackLogin',view_func=bLogin)
         #link?data1=dat
     app.run(host='0.0.0.0',port=5000)#app.run(debug=True,port=puerto)#Depuración

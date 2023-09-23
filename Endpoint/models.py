@@ -15,12 +15,13 @@ class User(db.Model):
     tipo= db.Column(db.Integer,unique = False,nullable=False)
     fechaNacimiento=db.Column(db.DateTime,default=datetime.datetime.now)
 
+    #Listas de enlaces
     Login=relationship("Login", back_populates="parentUser")
     Doctor_tipo=relationship("Doctor", back_populates="parentUser")
     Paciente_tipo=relationship("Paciente", back_populates="parentUser")
     Familiar_tipo=relationship("Familiar", back_populates="parentUser")
 
-    @property
+    '''@property
     def userPaciente(self):
         return self.Paciente_tipo[0]
     @property
@@ -28,75 +29,87 @@ class User(db.Model):
         return self.Doctor_tipo[0]
     @property
     def userFamiliar(self):
-        return self.Familiar_tipo[0]
+        return self.Familiar_tipo[0]'''
+    
     def __init__(self, username,apellidos,tipo,fechaNacimiento):
         self.username=username
         self.apellidos=apellidos
         self.tipo=tipo
         self.fechaNacimient=fechaNacimiento
+
     def to_dict(self):
         user_dict={
             "id":self.id,
             "username":self.username,
             "apellidos":self.apellidos,
             "fechaNacimient":self.fechaNacimiento,
-            "email":self.Login[0].Email,
+            "email":self.Login[0].getEmail(),
             "tipo":None
         }
         if self.tipo==0:
             user_dict["tipo"]="Paciente"
             user_dict["Doctor"]=self.Paciente_tipo[0].doctor_dict()
-            user_dict["familiares"]=self.Paciente_tipo[0].fam_list()
-        elif self.tipo==1:
+        elif self.tipo==1 :
             user_dict["tipo"]="Doctor"
             user_dict["Cedula profecional"]:self.Doctor_tipo[0].cedula_profecional
             user_dict["especialidad"]:self.Doctor_tipo[0].especialidad
             user_dict["pacientes"]=self.Doctor_tipo[0].pacientes_list()
         elif self.tipo==3:
             user_dict["tipo"]="Familiar"
-            user_dict["paciente"]=self.Familiar_tipo[0].paciente_dict()
+            user_dict["pacientes"]=self.Familiar_tipo[0].pacientes_list()
+        return user_dict
 
     
     
 class Login(db.Model):
     __tablename__ = "Login"
-    id = db.Column(db.Integer,unique = True, primary_key=True)
+    #id = db.Column(db.Integer,unique = True, primary_key=True)
     email = db.Column(db.String(30),nullable=False)
-    password = db.Column(db.String(150),nullable=False)
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True)
+    password = db.Column(db.String(66),nullable=False)
+
+    #enlase FK con usuario 
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
     parentUser = relationship("User", back_populates="Login")
     
     def __init__(self,ID_user ):
         self.ID_user=ID_user
-    @property
-    def Email(self):
+
+    def getEmail(self):
         return self.email
+    
     def setEmail(self,email):
-        self.email=email 
+        self.email=email
+
     def setPassword(self,password):
-        print(generate_password_hash(password))
-        print(len(generate_password_hash(password)))
         self.password=generate_password_hash(password)
+
     def checkPassword(self,password):
         return check_password_hash(self.password,password)
     
 class Doctor(db.Model):
     __tablename__ = "Doctor"
+
     cedula_profecional = db.Column(db.String(30),nullable=False,unique = True, primary_key=True)
+    especialidad = db.Column(db.String(30),nullable=False)
+
+    #enlase FK con usuario 
     ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True)
     parentUser = relationship("User", back_populates="Doctor_tipo")
-    especialidad = db.Column(db.String(30),nullable=False)
-    Pacientes=relationship("Paciente")
+
+    #Listas de enlaces
+    Pacientes=relationship("Paciente", back_populates="parentDoctor")
     
     def __init__(self,cedula_profecional,ID_user,especialidad="cardiologo") -> None:
         self.cedula_profecional=cedula_profecional
         self.ID_user=ID_user
         self.especialidad=especialidad
+
     def to_dict(self):
         user = User.query.filter_by(id = self.ID_user).first()
         doc_dict =user.to_dict()
         doc_dict.pop("pacientes")
         return doc_dict
+    
     def pacientes_list(self):
         if len(self.Pacientes):
             return [paciente.to_dict() for paciente in self.Pacientes]
@@ -105,26 +118,42 @@ class Doctor(db.Model):
 
 class Paciente(db.Model):
     __tablename__ = "Paciente"
-    id = db.Column(db.Integer,unique = True, primary_key=True)
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True)
+    #id = db.Column(db.Integer,unique = True, primary_key=True)
+
+    #enlase FK con usuario 
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
     parentUser = relationship("User", back_populates="Paciente_tipo")
+
+    #enlase FK con Doctor
     cedulaDoc=db.Column(db.String(30),ForeignKey('Doctor.cedula_profecional'))
-    #Familiares=relationship("Familiar")
+    parentDoctor = relationship("Doctor", back_populates="Pacientes")
+
+    #enlase FK con Familiar
+    ID_Fam=db.Column(db.String(30),ForeignKey('Familiar.ID_user'))
+    parentFamiliar = relationship("Familiar", back_populates="Pacientes")
+    
 
     def __init__(self,ID_user) -> None:
         self.ID_user=ID_user
+
     def setDoctor(self,cedulaDoc):
         self.cedulaDoc=cedulaDoc
+
     def to_dict(self):
         user = User.query.filter_by(id = self.ID_user).first()
-        paciente_dict = user.to_dict()
-        paciente_dict.pop("Doctor")
+        paciente_dict ={
+            'id':user.id,
+            'nombre':user.username,
+            'status':"dead"
+        }
         return paciente_dict
-    def fam_list(self):
+    
+    '''def fam_list(self):
         if len(self.Familiares):
             return [familiar.to_dict() for familiar in self.Familiares]
         else:
-            return "sin familiares"
+            return "sin familiares"'''
+    
     def doctor_dict(self):
         doc = Doctor.query.filter_by(cedula_profecional = self.cedulaDoc).first()
         if not doc is None:
@@ -133,30 +162,33 @@ class Paciente(db.Model):
             return "Sin doctor"
 class Familiar(db.Model):
     __tablename__ = "Familiar"
-    id = db.Column(db.Integer,unique = True, primary_key=True)
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),nullable=False,unique = True)
+    #id = db.Column(db.Integer,unique = True, primary_key=True)
+
+    #enlase FK con usuario 
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),nullable=False,unique = True, primary_key=True)
     parentUser = relationship("User", back_populates="Familiar_tipo")
-    '''ID_Paciente=db.Column(db.Integer,ForeignKey('Paciente.ID_user'),nullable=True)
-    ID_Doctor=db.Column(db.Integer,ForeignKey('Paciente.cedulaDoc'),nullable=True)'''
-    #Paciente=relationship("Paciente")
+
+    #Listas de enlaces
+    Pacientes=relationship("Paciente", back_populates="parentFamiliar")
 
     def __init__(self,ID_user) -> None:
         self.ID_user=ID_user
+
     def setPaciente(self,ID_Paciente,ID_Doctor):
         self.ID_Paciente=ID_Paciente
         self.ID_Doctor=ID_Doctor
-    def to_dict(self):
+
+    '''def to_dict(self):
         user = User.query.filter_by(id = self.ID_user).first()
         fam_dict=user.to_dict()
         fam_dict.pop('paciente')
-        return fam_dict
+        return fam_dict'''
     
-    def paciente_dict(self):
-        paciente = Paciente.query.filter_by(ID_user = self.ID_Paciente).first()
-        if not paciente is None:
-            return paciente.to_dict()
+    def pacientes_list(self):
+        if len(self.Pacientes):
+            return [paciente.to_dict() for paciente in self.Pacientes]
         else:
-            return "Sin Paciente"
+            return "sin pacientes"
         
 '''class Historial(db.Model):
     __tablename__ = "Historial"
