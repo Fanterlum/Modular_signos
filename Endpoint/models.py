@@ -138,6 +138,8 @@ class Paciente(db.Model):
 
     def setDoctor(self,cedulaDoc):
         self.cedulaDoc=cedulaDoc
+    def setFamiliar(self,ID_Fam):
+        self.ID_Fam=ID_Fam
 
     def to_dict(self):
         user = User.query.filter_by(id = self.ID_user).first()
@@ -173,10 +175,6 @@ class Familiar(db.Model):
 
     def __init__(self,ID_user) -> None:
         self.ID_user=ID_user
-
-    def setPaciente(self,ID_Paciente,ID_Doctor):
-        self.ID_Paciente=ID_Paciente
-        self.ID_Doctor=ID_Doctor
 
     '''def to_dict(self):
         user = User.query.filter_by(id = self.ID_user).first()

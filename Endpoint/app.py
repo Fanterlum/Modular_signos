@@ -51,46 +51,52 @@ def bDele(id):
 def bUpdate(id):
     return jsonify({'id':id})
 
-def http_Delete():
+'''def http_Delete():
     login= Login.query.filter_by(email = request.args.get( 'email' )).first()
     if not login is None and login.checkPassword(request.args.get( 'Password' )):
         user = User.query.filter_by(id = login.ID_user).first()
         db.session.delete(user)
-        db.session.commit()
+        db.session.commit()'''
 
 def http_Update():
-    login= Login.query.filter_by(email = request.args.get( 'email' )).first()
-    if not login is None and login.checkPassword(request.args.get( 'Password' )):
-        user = User.query.filter_by(id = login.ID_user).first()
-        if (request.args.get( 'username' )):
-            user.username=request.args.get( 'username' )
-        if (request.args.get( 'apellidos' )):
-            user.apellidos=request.args.get( 'apellidos' )
-        if (request.args.get( 'fechaNacimiento' )):
-            user.fechaNacimiento=request.args.get( 'fechaNacimiento' )
-        if (request.args.get( 'email' )):
-            login.setEmail(request.args.get( 'Email' ))
-        if (request.args.get( 'Password' )):
-            login.setPassword(request.args.get( 'Password' ))
-        
-        id_new = request.args.get( 'new' )
+    '''
+    if not login is None and login.checkPassword(request.args.get( 'Password' )):'''
+    login= Login.query.filter_by(ID_user = request.args.get( 'id' )).first()
+    user = User.query.filter_by(id = request.args.get( 'id' )).first()
+    if (request.args.get( 'username' )):
+        user.username=request.args.get( 'username' )
+    if (request.args.get( 'apellidos' )):
+        user.apellidos=request.args.get( 'apellidos' )
+    if (request.args.get( 'fechaNacimiento' )):
+        user.fechaNacimiento=request.args.get( 'fechaNacimiento' )
+    if (request.args.get( 'email' )):
+        login.setEmail(request.args.get( 'Email' ))
+    if (request.args.get( 'Password' )):
+        login.setPassword(request.args.get( 'Password' ))
+    
+    id_newDoc = request.args.get( 'newDoc' )
+    id_newFam = request.args.get( 'newFam' )
 
-        if user.tipo == 0 and id_new:
-            paciente = Paciente.query.filter_by(ID_user = user.id).first()
+    if user.tipo == 0:
+
+        paciente = Paciente.query.filter_by(ID_user = user.id).first()
+    
+        if not paciente is None:
+
+            if id_newFam:
+                paciente.setFamiliar(id_newFam)
+            if id_newDoc:
+                paciente.setDoctor(id_newDoc)
+                
+    '''elif user.tipo == 1 and request.args.get( 'new' ):
+        doc = Doctor.query.filter_by(ID_user = user.id).first()
+        if not doc is None:
+            paciente = Paciente.query.filter_by(ID_user = id_new).first()
             if not paciente is None:
-                fam = Familiar.query.filter_by(ID_user = id_new).first()
-                if not fam is None:
-                    fam.setPaciente(id_new,paciente.cedulaDoc)
-                
-        elif user.tipo == 1 and request.args.get( 'new' ):
-            doc = Doctor.query.filter_by(ID_user = user.id).first()
-            if not doc is None:
-                paciente = Paciente.query.filter_by(ID_user = id_new).first()
-                if not paciente is None:
-                    paciente.setDoctor(doc.cedula_profecional)
+                paciente.setDoctor(doc.cedula_profecional)'''
 
-        db.session.commit()
-                
+    db.session.commit()
+    return jsonify({'result':'okey'})
 def http_Create():
     user = User(
         username=request.args.get( 'username' ),
@@ -102,9 +108,10 @@ def http_Create():
     db.session.commit()
 
     login = Login(user.id)
-    print(user.id)
+
+    '''print(user.id)
     print(request.args.get( 'Email' ))
-    print(request.args.get( 'Email' ))
+    print(request.args.get( 'Email' ))'''
     login.setEmail(request.args.get( 'Email' ))
     login.setPassword(request.args.get( 'Password' ))
     
@@ -114,9 +121,15 @@ def http_Create():
         paciente=Paciente(user.id)
         db.session.add(paciente)
 
-    elif user.tipo == 1 and not request.args.get( 'cedula' ) is None:
-        doc=Doctor(request.args.get( 'cedula' ),user.id)
-        db.session.add(doc)
+    elif user.tipo == 1 :
+        if not request.args.get( 'cedula' ) is None:
+            print( request.args.get( 'cedula' ) )
+            doc=Doctor(request.args.get( 'cedula' ),user.id)
+            db.session.add(doc)
+        else:
+            print( request.args.get( 'cedula' ) )
+            #db.session.delete(login)
+            db.session.delete(user)
 
     elif user.tipo == 2:
         fam=Familiar(user.id)
@@ -180,7 +193,7 @@ if __name__=='__main__':
     
     with app.app_context():
         db.create_all()# crea la base de datos si no existe
-        app.add_url_rule('/DeleData',view_func=http_Delete)#consulta de la tabla usuario y login con api de flask
+        #app.add_url_rule('/DeleData',view_func=http_Delete)
         app.add_url_rule('/UpdtData',view_func=http_Update)
         app.add_url_rule('/CrteData',view_func=http_Create)
         app.add_url_rule('/ReadData',view_func=http_Read)
