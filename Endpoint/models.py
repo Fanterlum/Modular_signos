@@ -65,7 +65,7 @@ class Login(db.Model):
     __tablename__ = "Login"
     #id = db.Column(db.Integer,unique = True, primary_key=True)
     email = db.Column(db.String(30),nullable=False)
-    password = db.Column(db.String(66),nullable=False)
+    password = db.Column(db.String(255),nullable=False)
 
     #enlase FK con usuario 
     ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
