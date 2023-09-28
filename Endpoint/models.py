@@ -51,8 +51,8 @@ class User(db.Model):
             user_dict["Doctor"]=self.Paciente_tipo[0].doctor_dict()
         elif self.tipo==1 :
             user_dict["tipo"]="Doctor"
-            user_dict["Cedula profecional"]:self.Doctor_tipo[0].cedula_profecional
-            user_dict["especialidad"]:self.Doctor_tipo[0].especialidad
+            user_dict["Cedula profecional"]=self.Doctor_tipo[0].cedula_profecional
+            user_dict["especialidad"]=self.Doctor_tipo[0].especialidad
             user_dict["pacientes"]=self.Doctor_tipo[0].pacientes_list()
         elif self.tipo==3:
             user_dict["tipo"]="Familiar"
@@ -104,10 +104,20 @@ class Doctor(db.Model):
         self.ID_user=ID_user
         self.especialidad=especialidad
 
+    def setPacientes(self,id):
+        paciente=Paciente.query.filter_by(ID_user = id).first()
+        if paciente:
+            paciente.setDoctor(self.cedula_profecional)
+            
     def to_dict(self):
         user = User.query.filter_by(id = self.ID_user).first()
-        doc_dict =user.to_dict()
-        doc_dict.pop("pacientes")
+        if user:
+            doc_dict =user.to_dict()
+            doc_dict.pop("pacientes")
+        else:
+            doc_dict ={
+                'error':'no existe'
+            }
         return doc_dict
     
     def pacientes_list(self):
@@ -115,6 +125,7 @@ class Doctor(db.Model):
             return [paciente.to_dict() for paciente in self.Pacientes]
         else:
             return "sin pacientes"
+    
 
 class Paciente(db.Model):
     __tablename__ = "Paciente"
