@@ -1,5 +1,6 @@
 #Se importa de flask los objetos que ocuparemos 
 from flask import Flask, request, jsonify
+
 #Se importa configoraciones de desarrollo 
 from config import DevConfig 
 #Se importa configuraciones de la base de datos 
@@ -110,6 +111,7 @@ def http_Create():
     )
     db.session.add(user)
     db.session.commit()
+    #agregar verficacion si ya se creo el usuario
 
     login = Login(user.id)
 
@@ -191,6 +193,38 @@ def bLogin():
                 'logged':False
             }
         )
+    
+#Def userData by id of the user
+def userData():
+    user = User.query.filter_by(id=request.args.get('id')).first()
+    if user:
+        return jsonify({
+            'id': user.id,
+            'username': user.username,
+            'apellidos': user.apellidos,
+            'tipo': user.tipo,
+            'fechaNacimiento': user.fechaNacimiento.date()
+        })
+    #Falta cedula profecional y especialidad
+    else:
+        return jsonify({'id': None})
+
+#define drPtient getting all the patients of a doctor that has the same cedula profecional
+def drPatient():
+    #get all the id_user of the patients that has the same cedula profecional
+
+    doc = Paciente.query.filter_by(cedulaDoc = request.args.get('cedulaDoc')).all()
+    #Get the individual id of al the patients that doc has
+    id_user = []
+    for i in doc:
+        id_user.append(i.ID_user)
+    #Get the user of the patients
+    users = User.query.filter(User.id.in_(id_user)).all()
+    user_list = [{'id': user.id, 'username': user.username, 'apellidos': user.apellidos , 'tipo': user.tipo, 'fechaNacimiento' : user.fechaNacimiento.date} for user in users]
+    #falta ajustar fecha de nacimiento
+    
+    return jsonify(user_list)
+
 
 if __name__=='__main__': 
     db.init_app(app)#inicia el gestor db de la api
@@ -202,5 +236,9 @@ if __name__=='__main__':
         app.add_url_rule('/CrteData',view_func=http_Create)
         app.add_url_rule('/ReadData',view_func=http_Read)
         app.add_url_rule('/BackLogin',view_func=bLogin)
+        app.add_url_rule('/usrData',view_func=userData)
+        app.add_url_rule('/drPatient',view_func=drPatient)
+
+
         #link?data1=dat
     app.run(host='0.0.0.0',port=5000)#app.run(debug=True,port=puerto)#Depuración
