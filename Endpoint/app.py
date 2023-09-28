@@ -1,4 +1,3 @@
-
 #Se importa de flask los objetos que ocuparemos 
 from flask import Flask, request, jsonify
 #Se importa configoraciones de desarrollo 
@@ -77,17 +76,21 @@ def http_Update():
     
     id_newDoc = request.args.get( 'newDoc' )
     id_newFam = request.args.get( 'newFam' )
-
+    id_newPac = request.args.get( 'newPac' )
+    print(id_newDoc)
     if user.tipo == 0:
-
-        paciente = Paciente.query.filter_by(ID_user = user.id).first()
-    
-        if not paciente is None:
-
+        if user.Paciente_tipo:
+            paciente = user.Paciente_tipo[0]
             if id_newFam:
                 paciente.setFamiliar(id_newFam)
             if id_newDoc:
                 paciente.setDoctor(id_newDoc)
+    elif user.tipo==1:
+        if user.Doctor_tipo:
+            doc=user.Doctor_tipo[0]
+            if id_newPac:
+                doc.setPacientes(id_newPac)
+
                 
     '''elif user.tipo == 1 and request.args.get( 'new' ):
         doc = Doctor.query.filter_by(ID_user = user.id).first()
@@ -161,16 +164,10 @@ def http_Read():
             return user.Ondas #encriptar json'''
 def bLogin():
     login= Login.query.filter_by(email = request.args.get( 'email' )).first()
-
-    print(login.checkPassword(request.args.get( 'Password' )))
-
-
     if not login is None and login.checkPassword(request.args.get( 'Password' )):
         user = User.query.filter_by(id = login.ID_user).first()
 
         if user:
-
-            
             return jsonify(
                 {
                     'id':user.id,
