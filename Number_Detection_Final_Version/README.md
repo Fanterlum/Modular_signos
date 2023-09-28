@@ -45,3 +45,6 @@ Enter.
 
 Para ambientes de desarrollo Windows:
 Ejecutar con alguna extesión de compilación de windows.
+
+Adjunto una imagen de evidencia del funcionamiento del programa.
+[Evidencia](https://github.com/Fanterlum/Modular_signos/blob/jared/Number_Detection_Final_Version/assets/Evidencia.jpeg)
