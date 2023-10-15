@@ -79,20 +79,20 @@ class Peer:
 
         self.__name = 'partyGoer'
 
-        self.__hostname = socket.gethostname()
+        #self.__hostname = socket.gethostname()
 
     @property
     def destinos(self):
         return self.__destinos
     @property
     def hostname(self):
-        return self.__hostname
+        return socket.gethostname()
     @property
     def peerName(self):
         return self.__name
     @property
     def ipSource(self):
-        return socket.gethostbyname(self.__hostname)
+        return socket.gethostbyname(self.hostname)
     
 class UDP(Peer,packing):
     def __init__(self) -> None:
@@ -333,17 +333,26 @@ class PartyTCP(TCP):
 class RPC(Peer):
     
     def __init__(self) -> None:
-        self.__joineds=[]
+        self.__listener = None
+        self.__joined = None
         self.__onions=[]
 
-    def appJoined(self,MyClass,direccion='localhost', port=20064):# entrada de instruciones
-        joineder = xmlrpc.server.SimpleXMLRPCServer((direccion, port))
-        joineder.register_instance(MyClass)
-        joineder.serve_forever()
-        self.__joineds.append(joineder)
+    @property
+    def Joined(self):
+        return self.__joined
 
-    def getJoined(self,n):
-        return self.__joineds[n]
+    def serviceJoined(self,direccion='localhost', port=20064):# entrada de instruciones
+        self.__listener = threading.Thread(target=self.__listenerServe, daemon=True)
+        self.__joined = xmlrpc.server.SimpleXMLRPCServer((direccion, port))
+        #self.__joined.register_instance(MyClass)
+        #joineder.shutdown().serve_forever()
+        #self.__joineds.append(joineder)
+    def __listenerServe(self):
+        if not self.__joined is None:
+            self.__joined.serve_forever()
+    def starListener(self):
+        if not self.__listener is None:
+            self.__listener.start()
 
     def appOnion(self,proxyLink='http://localhost:20064'):# salida de instruciones
         self.__onions.append(xmlrpc.client.ServerProxy(proxyLink, allow_none=True))
