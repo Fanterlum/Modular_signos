@@ -24,6 +24,7 @@ DEFAULT_PORT_LARCH = 50011 # puerto por defecto para escuchar arch UDP
 DEFAULT_PORT_SEND = 50002   # puerto por defecto para enviar por UDP
 DEFAULT_PORT_DARCH = 50007   # puerto por defecto para TCP
 #DEFAULT_PORT_DMSG = 50008   # puerto por defecto para duplex arch
+DEFAULT_PORT_RPC=20064
 NONE_BIN = b'0'             # cadena binaria 0
 BITE_SIZE = 8
 KBIT_SIZE=1024
@@ -70,7 +71,7 @@ class packing:
         return decoded_dat
 class Peer:
     def __init__(self,nickname='Anonimo') -> None:
-        #self.__hosts = []
+        self.__hosts = []
         self.__partys = []
         self.__destinos = []
         
@@ -97,11 +98,11 @@ class Peer:
 class UDP(Peer,packing):
     def __init__(self) -> None:
         listenerMsg = threading.Thread(target=self.lmsg, daemon=True)
-        listenerArch = threading.Thread(target=self.larch, daemon=True)
-        listenerFlags = threading.Thread(target=self.lflags, daemon=True)
+        '''listenerArch = threading.Thread(target=self.larch, daemon=True)
+        listenerFlags = threading.Thread(target=self.lflags, daemon=True)'''
         listenerMsg.start()
-        listenerArch.start()
-        listenerFlags.start()
+        '''listenerArch.start()
+        listenerFlags.start()'''
     
     def lmsg(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
@@ -126,11 +127,11 @@ class UDP(Peer,packing):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
 
-            if not self.destino is None:
+            if self.destinos :
                 sUDP.sendto(b'msg', self.destinos[nDest])
                 sUDP.sendto(self.codex(msg), self.destinos[nDest])
 
-    def larch(self):
+    '''def larch(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LARCH))# se define el puerto de escucha 50011
 
@@ -175,7 +176,7 @@ class UDP(Peer,packing):
                         self.addDestino(address)
 
                 elif data == b'1':
-                    pass
+                    pass'''
 
     def addDestino(self,address):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
@@ -184,13 +185,25 @@ class UDP(Peer,packing):
             self.__destinos.append(address)
             sUDP.sendto(b'0', address)
             
-    def __len__(self):
-        return len(self.__hosts)
+    
 class RouterUDP(UDP):
-    def __init__(self) -> None:
-        pass
-    def __len__(self):
-        return len(self.__servers)
+    def lmsg(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
+            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LMSG))# se define el puerto de escucha 50001
+    
+            while True:
+                name_addres, address = sUDP.recvfrom(128)
+                self.addDestino(address=address)
+                index= self.__destinos.index(address)
+                self.sendMSN(self.__destinos[index],self.__hosts[name_addres])
+                
+    def lReg(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
+            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_R))# se define el puerto de escucha 50001
+            while True:
+                name_addres, address = sUDP.recvfrom(128)
+                self.__hosts[name_addres]=address
+    
 class PartyUDP(UDP):
     def __init__(self) -> None:
         pass
@@ -200,45 +213,61 @@ class PartyUDP(UDP):
         pass
     def __len__(self):
         return len(self.__servers) 
-    
 
-class TCP_onioner(packing):
-    def __init__(self,destino) -> None:
-        self.__destino=destino
-        # Connecting To Server
-        self.__onion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__onion.connect((self.__destino, DEFAULT_PORT_DARCH))
-
-    def listen_Onion(self):
-        while True:
+class TCP(packing):
+    def __init__(self) -> None:
+        self.__peerTCP=None
+        self.__addres=None
+        self.__listener = None
+    @property
+    def Peer(self):
+        return self.__peerTCP
+    def __listenerTCP(self):
+        while self.__peerTCP:
             try:
                 # Receive Message From Server
                 # If 'NICK' Send Nickname
-                message = self.__onion.recv(1024).decode('ascii')
-                if message == 'NICK':
-                    self.__onion.send(self.__nickname.encode('ascii'))
-                else:
-                    print(message)
+
+                message = self.decodex(self.__peerTCP.recv(CHUNK_SIZE))
+
+                self.__smgList.append(f'{self.__addres} : {message}')
+                self.__log.append(f'{self.__addres} : msg')
+
+                print(message)
             except:
                 # Close Connection When Error
                 print("An error occured!")
-                self.__onion.close()
+                self.__peerTCP.close()
                 break
 
-    def write(self):
-        while True:
-            message = '{}: {}'.format(self.__nickname, input(''))
-            self.__onion.send(message.encode('ascii'))
+    def starListener(self):
+        if not self.__listener is None:
+            self.__listener.start()
 
-class TCP(Peer,packing):
+    def service(self,peer,address):
+        # Accept Connection
+        #joined, address = self.__sTCP.accept()
+        self.__peerTCP=peer
+        self.__addres=address
+        self.__log.append(f'({address}) Connect')
+        self.__listener = threading.Thread(target=self.__listenerTCP,daemon=True)
+    
+    def send(self,message):
+        if self.__peerTCP:
+            self.__peerTCP.send(self.codex(message))
+    
+class MasterTCP(TCP,Peer):
     def __init__(self) -> None:
         self.__joineds=[]
         self.__onions=[]
-        self.__sTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__sTCP.bind((PL_ADDRESS, DEFAULT_PORT_DARCH))
-        self.__sTCP.listen()
+    @property
+    def sizeJoineds(self):
+        return len(self.__joineds)
+    @property
+    def sizeOnions(self):
+        return len(self.__onions)
         
-    def handleJoineds(self,joined):
+    '''def __listenerServe(self,joined):
         while True:
             try:
                 # Messages
@@ -249,19 +278,41 @@ class TCP(Peer,packing):
             except:
                index = self.__joineds.index(joined)
                self.removeJoined(index)
-               break
-
-    def appOnion(self,adress):
-        self.__onions.append(TCP_onioner(adress))
-    def joinig(self):
+               break  ''' 
+    def __listenerJoineds(self):
         while True:
             # Accept Connection
-            joined, address = self.__sTCP.accept()
+            joined, address = self.__peerTCP.accept()
+            
+            self.__joineds.append(TCP())
             self.__destinos.append(address)
-            self.__joineds.append(joined)
             self.__log.append(f'({address}) Connect')
-            thread = threading.Thread(target=self.handleJoineds, args=(joined,))
-            thread.start()
+
+            self.__joineds[len(self.__joineds)-1].service(joined)
+
+    def serviceJoineds(self):
+        self.__peerTCP=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__peerTCP.bind((PL_ADDRESS, DEFAULT_PORT_DARCH))
+        self.__peerTCP.listen()
+        self.__listener = threading.Thread(target=self.__listenerJoineds,daemon=True)
+
+    
+    def ListenJoined(self,n): 
+        self.__joineds[n].starListener()    
+    
+    def ListenOnion(self,n):
+        self.__onions[n].starListener()
+
+    def appOnion(self,addres):
+        onion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        onion.connect((addres, DEFAULT_PORT_DARCH))
+
+        self.__hosts.append(addres)
+        self.__log.append(f'({addres}) Connect')
+        self.__onions.append(TCP())
+
+        self.__onions[len(self.__onions)-1].service(onion)
+    
     def removeJoined(self,index):
         # Removing And Closing Clients
         joined=self.__joineds.pop(index)
@@ -269,41 +320,38 @@ class TCP(Peer,packing):
         address = self.__destinos[index]
         self.__log.append('{} left!'.format(address))
         self.__destinos.remove(address)
-class RouterTCP(TCP):
+
+    def removeOnion(self,index):
+        # Removing And Closing servers
+        onion=self.__onions.pop(index)
+        onion.close()
+        address = self.__hosts[index]
+        self.__log.append('{} left!'.format(address))
+        self.__hosts.remove(address)
+
+class RouterTCP(MasterTCP):
     def __init__(self) -> None:
         pass
     def __len__(self):
         return len(self.__servers)
-class PartyTCP(TCP):
+class PartyTCP(MasterTCP):
     def __init__(self) -> None:
-        self.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__server.bind((PL_ADDRESS, DEFAULT_PORT_R))
-        self.__server.listen()
+        
         self.__name="partyHost"
-        self.routers=[]
-        #self.peers=[]
-    
 
     def broadcastSmg(self,message):
         for client in self.__joineds:
             client.send(message)
 
-    def handle(self,joined):
-        while True:
-            try:
-                # Broadcasting Messages
-                message = joined.recv(CHUNK_SIZE)
-                index = self.__joineds.index(joined)
-                self.__smgList.append(f'{self.__destinos[index]} : {message}')
-                self.__log.append(f'{self.__destinos[index]} : broadcasting msg')
-                self.broadcastSmg(message)
-            except:
-                # Removing And Closing Clients
-                index = self.__joineds.index(joined)
-                self.removeJoined(index)
-                break
+    def ListenerAllOnions(self):
+        if not self.__listener is None:
+            for onion in self.__onions :
+                onion.starListener()
     
-
+    def ListenerAllJoineds(self):
+        if not self.__listener is None:
+            for joined in self.__joineds :
+                joined.starListener()
     
     def getPartyChat(self):
         pass
@@ -341,7 +389,7 @@ class RPC(Peer):
     def Joined(self):
         return self.__joined
 
-    def serviceJoined(self,direccion='localhost', port=20064):# entrada de instruciones
+    def serviceJoined(self,direccion=L_ADDRESS, port=DEFAULT_PORT_RPC):# entrada de instruciones
         self.__listener = threading.Thread(target=self.__listenerServe, daemon=True)
         self.__joined = xmlrpc.server.SimpleXMLRPCServer((direccion, port))
         #self.__joined.register_instance(MyClass)
@@ -354,7 +402,7 @@ class RPC(Peer):
         if not self.__listener is None:
             self.__listener.start()
 
-    def appOnion(self,proxyLink='http://localhost:20064'):# salida de instruciones
+    def appOnion(self,proxyLink=f'http://{L_ADDRESS}:{DEFAULT_PORT_RPC}'):# salida de instruciones
         self.__onions.append(xmlrpc.client.ServerProxy(proxyLink, allow_none=True))
 
     def getOnion(self,n):
