@@ -93,7 +93,10 @@ class Peer:
         return self.__name
     @property
     def ipSource(self):
-        return socket.gethostbyname(self.hostname)
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
+            sUDP.connect(("8.8.8.8", 80))
+            ip=sUDP.getsockname()[0]
+        return socket.gethostbyname(ip)
     
 class UDP(Peer,packing):
     def __init__(self) -> None:
