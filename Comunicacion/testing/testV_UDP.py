@@ -6,5 +6,6 @@ udp.sendFlag(("192.168.84.128",DEFAULT_PORT_F),'addme')
 udp.sendMSN(("192.168.84.128",DEFAULT_PORT_LMSG),'nose')
 while True:
     input(':')
-    udp.sendFlag(("192.168.84.128",DEFAULT_PORT_F),'dropme','vision')
-    print(udp.smgList)
+    udp.sendFlag(("192.168.84.128",DEFAULT_PORT_F),'dropme','prediccion')
+    print(udp.Peers)
+    udp.sendFlag(("192.168.84.128",DEFAULT_PORT_F),'func','testf')
