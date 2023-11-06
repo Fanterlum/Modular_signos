@@ -146,7 +146,7 @@ class UDP(Peer,packing):
                         print(registro_log)
                         self.sendFlag((address[0],DEFAULT_PORT_F),'addme')
                 if s=='dropme':
-                    self.sendMSN((address[0],DEFAULT_PORT_F),self.__peers.get(d,'?'))
+                    self.sendMSN((address[0],DEFAULT_PORT_LMSG),self.__peers.get(d,'?'))
                         
     def sendMSN(self,addres:tuple,msg:str):
         #...mensajes
@@ -245,10 +245,11 @@ class PartyUDP(UDP):
         return len(self.__servers) 
 
 class TCP(packing):
-    def __init__(self) -> None:
-        self.__peerTCP=None
-        self.__addres=None
-        self.__listener = None
+    __peerTCP=None
+    __addres=None
+    __listener = None
+    #def __init__(self) -> None:
+        
     @property
     def Peer(self):
         return self.__peerTCP
@@ -257,13 +258,16 @@ class TCP(packing):
             try:
                 # Receive Message From Server
                 # If 'NICK' Send Nickname
+                with open("F.jpg", "wb") as f:
+                    message = self.decodex(self.__peerTCP.recv(CHUNK_SIZE))
+                    while message:
+                        f.write(message)
+                        message = self.decodex(self.__peerTCP.recv(CHUNK_SIZE))
 
-                message = self.decodex(self.__peerTCP.recv(CHUNK_SIZE))
-
-                self.smgList.append(f'{self.__addres} : {message}')
+                '''self.smgList.append(f'{self.__addres} : {message}')
                 self.log.append(f'{self.__addres} : msg')
 
-                print(message)
+                print(message)'''
             except:
                 # Close Connection When Error
                 print("An error occured!")
@@ -282,15 +286,15 @@ class TCP(packing):
         self.log.append(f'({address}) Connect')
         self.__listener = threading.Thread(target=self.__listenerTCP,daemon=True)
     
-    def send(self,message):
+    def sendArch(self,message):
         if self.__peerTCP:
-            self.__peerTCP.send(self.codex(message))
+            self.__peerTCP.sendfile(self.codex(message))
     
 class MasterTCP(TCP,Peer):
-    def __init__(self) -> None:
-        self.__hosts=[]
-        self.__joineds=[]
-        self.__onions=[]
+    #def __init__(self) -> None:
+    __hosts=[]
+    __joineds=[]
+    __onions=[]
     @property
     def sizeJoineds(self):
         return len(self.__joineds)
@@ -317,9 +321,9 @@ class MasterTCP(TCP,Peer):
             
             self.__joineds.append(TCP())
             self._destinos.append(address)
-            self._log.append(f'({address}) Connect')
+            self.__log.append(f'({address}) Connect')
 
-            self.__joineds[len(self.__joineds)-1].service(joined)
+            self.__joineds[len(self.__joineds)-1].service(joined, address)
 
     def serviceJoineds(self):
         self.__peerTCP=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -348,8 +352,8 @@ class MasterTCP(TCP,Peer):
         # Removing And Closing Clients
         joined=self.__joineds.pop(index)
         joined.close()
-        address = self.__destinos[index]
-        self._log.append('{} left!'.format(address))
+        address = self._destinos[index]
+        self.__log.append('{} left!'.format(address))
         self._destinos.remove(address)
 
     def removeOnion(self,index):
