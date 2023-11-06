@@ -33,22 +33,24 @@ NBIT_SIZE = BITE_SIZE * 2
 TIPE_SIZE = BITE_SIZE / 2
 HASH_SIZE = BITE_SIZE ** 2
 class packing:
+    __archList=[]
+    __smgList=[]
+    __log=[]
     
-    def __init__(self) -> None:
-
-        self._archList=[]
-        self._smgList=[]
-        self._log=[]
+    '''def __init__(self) -> None:
+        pass'''
+        
 
     @property
     def archList(self):
         return self.__archList
     @property
     def smgList(self):
-        return self.smgList
+        return self.__smgList
     @property
     def log(self):
-        return self._log
+        return self.__log
+    
     def header(n,nlen,pakedhash,totalhash):
         nbin=format(n, "b").encode()
         relleno_nbin=(NONE_BIN*(NBIT_SIZE-len(nbin)))
@@ -70,15 +72,11 @@ class packing:
         decoded_dat = base64.urlsafe_b64decode(decompres_dat)
         return decoded_dat
 class Peer:
-    def __init__(self,nickname='Anonimo') -> None:
-        
-        self._destinos=[]
+    _destinos=[]
+    __nickname='Anonimo'
+    __name = 'partyGoer'
 
-        self._nickname=nickname
-
-        self._name = 'partyGoer'
-
-        #self.__hostname = socket.gethostname()
+    #self.__hostname = socket.gethostname()
 
     @property
     def destinos(self):
@@ -88,7 +86,7 @@ class Peer:
         return socket.gethostname()
     @property
     def peerName(self):
-        return self._name
+        return self.__nickname
     @property
     def ipSource(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
@@ -98,7 +96,8 @@ class Peer:
     
 class UDP(Peer,packing):
     
-    def __init__(self) -> None:
+    def __init__(self,nickname='Anonimo') -> None:
+        self.__nickname=nickname
         self.__peers={}
         listenerMsg = threading.Thread(target=self.lmsg, daemon=True)
         '''listenerArch = threading.Thread(target=self.larch, daemon=True)'''
@@ -110,29 +109,32 @@ class UDP(Peer,packing):
     
     def lmsg(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
-            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_F))# se define el puerto de escucha 50001
+            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LMSG))# se define el puerto de escucha 50001
     
             while True:
                 #flag, address = sUDP.recvfrom(128)
                 #se resiben buffer de binarios de 1024 digitos de longitud
-                data = self.decodex(sUDP.recv(CHUNK_SIZE))
+                endata=sUDP.recv(CHUNK_SIZE)
+                
+                data = self.decodex(endata).decode()
+                print(data)
                 name,dat=data.split(':')
                 #mensajes
-                registro_smg='{} : {} '.format(name,data)
+                registro_smg='{} : {} '.format(name,dat)
                 registro_log='{} : {} '.format(name,'msg')
                 
                 print(registro_smg)
                 print(registro_log)
-                self._smgList.append(registro_smg)
-                self._log.append(registro_log)
+                self.smgList.append(registro_smg)
+                self.log.append(registro_log)
     def lflag(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
-            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LMSG))# se define el puerto de escucha 50001
+            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_F))# se define el puerto de escucha 50001
     
             while True:
                 flag, address = sUDP.recvfrom(128)
-                s,d=flag.split(':')
-                if s.decode()=='addme':
+                s,d=flag.decode().split(':')
+                if s=='addme':
                     try:
                         list(self.__peers.values()).index(address[0])
                     except:
@@ -140,7 +142,7 @@ class UDP(Peer,packing):
                         registro_log='{} : {} '.format(address,s)
                         print(registro_log)
                         self.sendFlag((address[0],DEFAULT_PORT_F),'addme')
-                if s.decode()=='dropme':
+                if s=='dropme':
                     self.sendMSN((address[0],DEFAULT_PORT_F),self.__peers.get(d,'?'))
                         
     def sendMSN(self,addres:tuple,msg:str):
@@ -149,8 +151,8 @@ class UDP(Peer,packing):
         #se envia la cadena de texto codificada y comprimida en binario
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
-            sUDP.sendto(b'msg', addres)
             sUDP.sendto(self.codex(f'{self.peerName}:{msg}'.encode()), addres)
+
     def sendFlag(self,address:tuple,flag:str,name=""):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
@@ -255,8 +257,8 @@ class TCP(packing):
 
                 message = self.decodex(self.__peerTCP.recv(CHUNK_SIZE))
 
-                self._smgList.append(f'{self.__addres} : {message}')
-                self._log.append(f'{self.__addres} : msg')
+                self.smgList.append(f'{self.__addres} : {message}')
+                self.log.append(f'{self.__addres} : msg')
 
                 print(message)
             except:
@@ -274,7 +276,7 @@ class TCP(packing):
         #joined, address = self.__sTCP.accept()
         self.__peerTCP=peer
         self.__addres=address
-        self._log.append(f'({address}) Connect')
+        self.log.append(f'({address}) Connect')
         self.__listener = threading.Thread(target=self.__listenerTCP,daemon=True)
     
     def send(self,message):
@@ -334,7 +336,7 @@ class MasterTCP(TCP,Peer):
         onion.connect((addres, DEFAULT_PORT_DARCH))
 
         self.__hosts.append(addres)
-        self._log.append(f'({addres}) Connect')
+        self.log.append(f'({addres}) Connect')
         self.__onions.append(TCP())
 
         self.__onions[len(self.__onions)-1].service(onion)
@@ -352,7 +354,7 @@ class MasterTCP(TCP,Peer):
         onion=self.__onions.pop(index)
         onion.close()
         address = self.__hosts[index]
-        self._log.append('{} left!'.format(address))
+        self.log.append('{} left!'.format(address))
         self.__hosts.remove(address)
 
 class RouterTCP(MasterTCP):
