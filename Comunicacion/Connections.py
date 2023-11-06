@@ -94,10 +94,13 @@ class Peer:
             ip=sUDP.getsockname()[0]
         return socket.gethostbyname(ip)
     
+    def setNickname(self,nickname):
+        self.__nickname=nickname
+    
 class UDP(Peer,packing):
     
     def __init__(self,nickname='Anonimo') -> None:
-        self.__nickname=nickname
+        self.setNickname(nickname)
         self.__peers={}
         listenerMsg = threading.Thread(target=self.lmsg, daemon=True)
         '''listenerArch = threading.Thread(target=self.larch, daemon=True)'''
