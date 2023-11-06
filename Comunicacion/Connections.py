@@ -75,6 +75,7 @@ class Peer:
     _destinos=[]
     __nickname='Anonimo'
     __name = 'partyGoer'
+    __peers={}
 
     #self.__hostname = socket.gethostname()
 
@@ -82,11 +83,14 @@ class Peer:
     def destinos(self):
         return self._destinos
     @property
-    def hostname(self):
-        return socket.gethostname()
-    @property
     def peerName(self):
         return self.__nickname
+    @property
+    def Peers(self):
+        return self.__peers
+    @property
+    def hostname(self):
+        return socket.gethostname()
     @property
     def ipSource(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
@@ -101,7 +105,7 @@ class UDP(Peer,packing):
     
     def __init__(self,nickname='Anonimo') -> None:
         self.setNickname(nickname)
-        self.__peers={}
+        #self.__peers={}
         listenerMsg = threading.Thread(target=self.lmsg, daemon=True)
         '''listenerArch = threading.Thread(target=self.larch, daemon=True)'''
         listenerFlags = threading.Thread(target=self.lflag, daemon=True)
@@ -139,14 +143,19 @@ class UDP(Peer,packing):
                 s,d=flag.decode().split(':')
                 if s=='addme':
                     try:
-                        list(self.__peers.values()).index(address[0])
+                        list(self.Peers.values()).index(address[0])
                     except:
-                        self.__peers[d]=address[0]
+                        self.Peers[d]=address[0]
                         registro_log='{} : {} '.format(address,s)
                         print(registro_log)
                         self.sendFlag((address[0],DEFAULT_PORT_F),'addme')
                 if s=='dropme':
-                    self.sendMSN((address[0],DEFAULT_PORT_LMSG),self.__peers.get(d,'?'))
+                    drop=self.Peers.get(d,None)
+                    if drop:
+                        self.sendFlag((drop,DEFAULT_PORT_F),'dropyou',address[0])
+                    #self.sendMSN((address[0],DEFAULT_PORT_LMSG),self.Peers.get(d,'?'))
+                if s=='dropyou':
+                    self.sendFlag((d,DEFAULT_PORT_F),'addme')
                         
     def sendMSN(self,addres:tuple,msg:str):
         #...mensajes
@@ -156,15 +165,15 @@ class UDP(Peer,packing):
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
             sUDP.sendto(self.codex(f'{self.peerName}:{msg}'.encode()), addres)
 
-    def sendFlag(self,address:tuple,flag:str,name=""):
+    def sendFlag(self,address:tuple,flag:str,d=""):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
             #self.__log.append(f'new Destino ({address})')
             #self.__destinos.append(address)
             if flag=='addme':
                 sUDP.sendto(f'{flag}:{self.peerName}'.encode(), address)
-            elif flag=='dropme':
-                sUDP.sendto(f'{flag}:{name}'.encode(), address)
+            else:
+                sUDP.sendto(f'{flag}:{d}'.encode(), address)
     '''def larch(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LARCH))# se define el puerto de escucha 50011
