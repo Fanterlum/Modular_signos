@@ -6,6 +6,8 @@ import zlib
 from hashlib import sha512
 import xmlrpc.server #import SimpleXMLRPCServer
 import xmlrpc.client #import ServerProxy
+
+from functools import partial
 '''TCP es un protocolo orientado a la conexión mientras que UDP no utiliza 
 conexión. TCP establece una conexión entre un remitente y un receptor antes 
 de que se puedan enviar los datos. UDP en cambio, no establece ninguna 
@@ -76,6 +78,7 @@ class Peer:
     __nickname='Anonimo'
     __name = 'partyGoer'
     __peers={}
+    __funcs={}
 
     #self.__hostname = socket.gethostname()
 
@@ -89,6 +92,9 @@ class Peer:
     def Peers(self):
         return self.__peers
     @property
+    def Func(self):
+        return self.__funcs
+    @property
     def hostname(self):
         return socket.gethostname()
     @property
@@ -100,6 +106,22 @@ class Peer:
     
     def setNickname(self,nickname):
         self.__nickname=nickname
+
+    def register_function(self, function=None, name=None):
+        """Registers a function to respond to XML-RPC requests.
+
+        The optional name argument can be used to set a Unicode name
+        for the function.
+        """
+        # decorator factory
+        if function is None:
+            return partial(self.register_function, name=name)
+
+        if name is None:
+            name = function.__name__
+        self.__funcs[name] = function
+
+        return function
     
 class UDP(Peer,packing):
     
@@ -156,6 +178,8 @@ class UDP(Peer,packing):
                     #self.sendMSN((address[0],DEFAULT_PORT_LMSG),self.Peers.get(d,'?'))
                 if s=='dropyou':
                     self.sendFlag((d,DEFAULT_PORT_F),'addme')
+                if s=='func':
+                    self.Func.get(d)()
                         
     def sendMSN(self,addres:tuple,msg:str):
         #...mensajes
