@@ -18,7 +18,7 @@ SOCK_DGRAM means that it is a UDP socket.
 PL_ADDRESS = '0.0.0.0'      # para fuera de la red local 
 L_ADDRESS = '127.0.0.1'     # para fuera la red local 
 P_PORT = 80                 # puerto para conexiones publicas 
-DEFAULT_PORT_R = 55555      # puerto por defecto escuchar flags UDP
+DEFAULT_PORT_F = 55555      # puerto por defecto escuchar flags UDP
 DEFAULT_PORT_LMSG = 50001 # puerto por defecto para escuchar msg UDP
 DEFAULT_PORT_LARCH = 50011 # puerto por defecto para escuchar arch UDP
 DEFAULT_PORT_SEND = 50002   # puerto por defecto para enviar por UDP
@@ -36,19 +36,19 @@ class packing:
     
     def __init__(self) -> None:
 
-        self.__archList=[]
-        self.__smgList=[]
-        self.__log=[]
+        self._archList=[]
+        self._smgList=[]
+        self._log=[]
 
     @property
     def archList(self):
         return self.__archList
     @property
     def smgList(self):
-        return self.__smgList
+        return self.smgList
     @property
     def log(self):
-        return self.__log
+        return self._log
     def header(n,nlen,pakedhash,totalhash):
         nbin=format(n, "b").encode()
         relleno_nbin=(NONE_BIN*(NBIT_SIZE-len(nbin)))
@@ -60,37 +60,35 @@ class packing:
 
         return header_nbin+header_nlenbin+pakedhash+totalhash
 
-    def codex(dat):
+    def codex(self,dat:bytes):
         encoded_dat = base64.urlsafe_b64encode(dat)
         compres_dat = zlib.compress(encoded_dat)
         return compres_dat
     
-    def decodex(dat):
+    def decodex(self,dat:bytes):
         decompres_dat = zlib.decompress(dat)
         decoded_dat = base64.urlsafe_b64decode(decompres_dat)
         return decoded_dat
 class Peer:
     def __init__(self,nickname='Anonimo') -> None:
-        self.__hosts = []
-        self.__partys = []
-        self.__destinos = []
         
+        self._destinos=[]
 
-        self.__nickname=nickname
+        self._nickname=nickname
 
-        self.__name = 'partyGoer'
+        self._name = 'partyGoer'
 
         #self.__hostname = socket.gethostname()
 
     @property
     def destinos(self):
-        return self.__destinos
+        return self._destinos
     @property
     def hostname(self):
         return socket.gethostname()
     @property
     def peerName(self):
-        return self.__name
+        return self._name
     @property
     def ipSource(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
@@ -99,41 +97,69 @@ class Peer:
         return socket.gethostbyname(ip)
     
 class UDP(Peer,packing):
+    
     def __init__(self) -> None:
+        self.__peers={}
         listenerMsg = threading.Thread(target=self.lmsg, daemon=True)
-        '''listenerArch = threading.Thread(target=self.larch, daemon=True)
-        listenerFlags = threading.Thread(target=self.lflags, daemon=True)'''
+        '''listenerArch = threading.Thread(target=self.larch, daemon=True)'''
+        listenerFlags = threading.Thread(target=self.lflag, daemon=True)
         listenerMsg.start()
+        listenerFlags.start()
         '''listenerArch.start()
         listenerFlags.start()'''
     
     def lmsg(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
+            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_F))# se define el puerto de escucha 50001
+    
+            while True:
+                #flag, address = sUDP.recvfrom(128)
+                #se resiben buffer de binarios de 1024 digitos de longitud
+                data = self.decodex(sUDP.recv(CHUNK_SIZE))
+                name,dat=data.split(':')
+                #mensajes
+                registro_smg='{} : {} '.format(name,data)
+                registro_log='{} : {} '.format(name,'msg')
+                
+                print(registro_smg)
+                print(registro_log)
+                self._smgList.append(registro_smg)
+                self._log.append(registro_log)
+    def lflag(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LMSG))# se define el puerto de escucha 50001
     
             while True:
                 flag, address = sUDP.recvfrom(128)
-                #se resiben buffer de binarios de 1024 digitos de longitud
-                data = self.decodex(sUDP.recv(CHUNK_SIZE))
-                #mensajes
-                registro_smg='{} : {} '.format(address,data)
-                registro_log='{} : {} '.format(address,flag)
-                print(registro_smg)
-                print(registro_log)
-                self.__smgList.append(registro_smg)
-                self.__log.append(registro_log)
-
-    def sendMSN(self,nDest,msg):
+                s,d=flag.split(':')
+                if s.decode()=='addme':
+                    try:
+                        list(self.__peers.values()).index(address[0])
+                    except:
+                        self.__peers[d]=address[0]
+                        registro_log='{} : {} '.format(address,s)
+                        print(registro_log)
+                        self.sendFlag((address[0],DEFAULT_PORT_F),'addme')
+                if s.decode()=='dropme':
+                    self.sendMSN((address[0],DEFAULT_PORT_F),self.__peers.get(d,'?'))
+                        
+    def sendMSN(self,addres:tuple,msg:str):
         #...mensajes
         #msg = input('> ')
         #se envia la cadena de texto codificada y comprimida en binario
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
-
-            if self.destinos :
-                sUDP.sendto(b'msg', self.destinos[nDest])
-                sUDP.sendto(self.codex(msg), self.destinos[nDest])
-
+            sUDP.sendto(b'msg', addres)
+            sUDP.sendto(self.codex(f'{self.peerName}:{msg}'.encode()), addres)
+    def sendFlag(self,address:tuple,flag:str,name=""):
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
+            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
+            #self.__log.append(f'new Destino ({address})')
+            #self.__destinos.append(address)
+            if flag=='addme':
+                sUDP.sendto(f'{flag}:{self.peerName}'.encode(), address)
+            elif flag=='dropme':
+                sUDP.sendto(f'{flag}:{name}'.encode(), address)
     '''def larch(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LARCH))# se define el puerto de escucha 50011
@@ -181,16 +207,12 @@ class UDP(Peer,packing):
                 elif data == b'1':
                     pass'''
 
-    def addDestino(self,address):
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
-            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_SEND))# se define el puerto de envio 50002
-            self.__log.append(f'new Destino ({address})')
-            self.__destinos.append(address)
-            sUDP.sendto(b'0', address)
+    
             
     
-class RouterUDP(UDP):
-    def lmsg(self):
+#class RouterUDP(UDP):
+    
+    '''def lmsg(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
             sUDP.bind((PL_ADDRESS, DEFAULT_PORT_LMSG))# se define el puerto de escucha 50001
     
@@ -198,14 +220,14 @@ class RouterUDP(UDP):
                 name_addres, address = sUDP.recvfrom(128)
                 self.addDestino(address=address)
                 index= self.__destinos.index(address)
-                self.sendMSN(self.__destinos[index],self.__hosts[name_addres])
+                self.sendMSN(index,self.__servers[name_addres])
                 
     def lReg(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sUDP:
-            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_R))# se define el puerto de escucha 50001
+            sUDP.bind((PL_ADDRESS, DEFAULT_PORT_F))# se define el puerto de escucha 50001
             while True:
                 name_addres, address = sUDP.recvfrom(128)
-                self.__hosts[name_addres]=address
+                self.__hosts[name_addres]=address'''
     
 class PartyUDP(UDP):
     def __init__(self) -> None:
@@ -233,8 +255,8 @@ class TCP(packing):
 
                 message = self.decodex(self.__peerTCP.recv(CHUNK_SIZE))
 
-                self.__smgList.append(f'{self.__addres} : {message}')
-                self.__log.append(f'{self.__addres} : msg')
+                self._smgList.append(f'{self.__addres} : {message}')
+                self._log.append(f'{self.__addres} : msg')
 
                 print(message)
             except:
@@ -252,7 +274,7 @@ class TCP(packing):
         #joined, address = self.__sTCP.accept()
         self.__peerTCP=peer
         self.__addres=address
-        self.__log.append(f'({address}) Connect')
+        self._log.append(f'({address}) Connect')
         self.__listener = threading.Thread(target=self.__listenerTCP,daemon=True)
     
     def send(self,message):
@@ -261,6 +283,7 @@ class TCP(packing):
     
 class MasterTCP(TCP,Peer):
     def __init__(self) -> None:
+        self.__hosts=[]
         self.__joineds=[]
         self.__onions=[]
     @property
@@ -288,8 +311,8 @@ class MasterTCP(TCP,Peer):
             joined, address = self.__peerTCP.accept()
             
             self.__joineds.append(TCP())
-            self.__destinos.append(address)
-            self.__log.append(f'({address}) Connect')
+            self._destinos.append(address)
+            self._log.append(f'({address}) Connect')
 
             self.__joineds[len(self.__joineds)-1].service(joined)
 
@@ -311,7 +334,7 @@ class MasterTCP(TCP,Peer):
         onion.connect((addres, DEFAULT_PORT_DARCH))
 
         self.__hosts.append(addres)
-        self.__log.append(f'({addres}) Connect')
+        self._log.append(f'({addres}) Connect')
         self.__onions.append(TCP())
 
         self.__onions[len(self.__onions)-1].service(onion)
@@ -321,15 +344,15 @@ class MasterTCP(TCP,Peer):
         joined=self.__joineds.pop(index)
         joined.close()
         address = self.__destinos[index]
-        self.__log.append('{} left!'.format(address))
-        self.__destinos.remove(address)
+        self._log.append('{} left!'.format(address))
+        self._destinos.remove(address)
 
     def removeOnion(self,index):
         # Removing And Closing servers
         onion=self.__onions.pop(index)
         onion.close()
         address = self.__hosts[index]
-        self.__log.append('{} left!'.format(address))
+        self._log.append('{} left!'.format(address))
         self.__hosts.remove(address)
 
 class RouterTCP(MasterTCP):
@@ -410,21 +433,14 @@ class RPC(Peer):
 
     def getOnion(self,n):
         return self.__onions[n]
-
-    def __len__(self):
-        return len(self.__destinos)
 class PartyRPC(RPC):
     def __init__(self) -> None:
         pass
     def broadcast(self,message):
         pass
-    def __len__(self):
-        return len(self.__destinos)
 class RouterRPC(RPC):
     def __init__(self) -> None:
         pass
-    def __len__(self):
-        return len(self.__destinos)
 '''def listen(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind((PL_ADDRESS, self.listenPort))# se define el puerto de envio 50001
