@@ -7,9 +7,11 @@ from config import DevConfig
 #from BDManager import DatabaseManager as db_CRUD
 from models import db, User, Login, Paciente, Doctor, Familiar
 #Se importa configuraciones de la base de datos y comunicaciones
-#from Comunicacion.Connections import RPC as epRPC
+from Comunicacion.Connections import RPC, UDP, MasterTCP
 #se declara un gestor de Base de datos mediante RPC
 #endPoindRPC=epRPC()
+rpc=RPC()
+udp=UDP('endpoint')
 #endPoindRPC.appJoined(db_CRUD)#se agregan entrada de instruciones para manejar la base de datos por RPC
 #se inicializa la API 
 app=Flask(__name__) 
@@ -52,12 +54,27 @@ def bDele(id):
 def bUpdate(id):
     return jsonify({'id':id})
 
+#funciones para Vicion y Prediccion RPC
+
+@app.route('/userStatus/<id>')
+def Status(id):
+    return jsonify(rpc.getOnion[1].getStatus(id))
+def StatusQ():
+    return jsonify(rpc.getOnion[1].getStatus(request.args.get( 'id' )))
+
+@app.route('/userCoordinates/<id>')
+def Coordinates(id):
+    return jsonify(rpc.getOnion[0].getCoordinates(id))
+def CoordinatesQ():
+    return jsonify(rpc.getOnion[0].getCoordinates(request.args.get( 'id' )))
+
 '''def http_Delete():
     login= Login.query.filter_by(email = request.args.get( 'email' )).first()
     if not login is None and login.checkPassword(request.args.get( 'Password' )):
         user = User.query.filter_by(id = login.ID_user).first()
         db.session.delete(user)
         db.session.commit()'''
+
 
 def http_Update():
     '''
@@ -226,7 +243,28 @@ def drPatient():
     return jsonify(user_list)
 
 
+#funciones UDP
+def sincronice(dest):#Sincronisacion UDP
+    print('server sincronice!!! o_0')
+    lost_Vision=True
+    lost_Predict=True
+    while lost_Vision and lost_Predict:
+
+        if udp.Peers.get('vision',None):
+            lost_Vision=False
+        else:
+            print('esperando [vision]')
+
+        if udp.Peers.get('prediccion',None):
+                lost_Predict=False
+        else:
+            print('esperando [prediccion]')
+
 if __name__=='__main__': 
+    sincronice()
+    #inicia el conexiones db con RPC
+    rpc.appOnion(f'http://{udp.Peers.get("vision")}:20064')#index 0
+    rpc.appOnion(f'http://{udp.Peers.get("prediccion")}:20064')#index 0
     db.init_app(app)#inicia el gestor db de la api
     
     with app.app_context():
@@ -238,7 +276,8 @@ if __name__=='__main__':
         app.add_url_rule('/BackLogin',view_func=bLogin)
         app.add_url_rule('/usrData',view_func=userData)
         app.add_url_rule('/drPatient',view_func=drPatient)
-
-
+        
+        app.add_url_rule('/Status',view_func=StatusQ)
+        app.add_url_rule('/Coordinates',view_func=CoordinatesQ)
         #link?data1=dat
     app.run(host='0.0.0.0',port=5000)#app.run(debug=True,port=puerto)#Depuración

@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String,DateTime
+from sqlalchemy import Column, Integer, String,DateTime,LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 import datetime
 
 # Crear una clase base para las entidades
@@ -9,8 +11,10 @@ db = declarative_base()
 class User(db):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+
+    Status=relationship("Status", back_populates="parentUser")
+    Coordinates=relationship("Coordinates", back_populates="parentUser")
+    CacheFiles=relationship("CacheFiles", back_populates="parentUser")
 
     def buildQueryInsert(self,username,email):
         return User.__table__.insert().values(username=username, email=email)
@@ -31,17 +35,34 @@ class User(db):
         query = User.__table__.delete().where(User.id == user_id)
         #engine.connect().execute()
         return query
+class CacheFiles(db):
+    __tablename__ = "CacheFiles"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    parentUser = relationship("User", back_populates="CacheFiles")
+    file = Column(LargeBinary)
+    tipe = Column(String)
+    date = Column(DateTime,default=datetime.datetime.now)
 
 class Status(db):
     __tablename__ = "Status"
     id = Column(Integer, primary_key=True, autoincrement=True)
+
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    parentUser = relationship("User", back_populates="Status")
+
     data = Column(Integer, nullable=False)
     date = Column(DateTime,default=datetime.datetime.now)
+    
     def __str__(self) -> str:
         return f'{self.id}|{self.data}|{self.date}'
 class Coordinates(db):
     __tablename__ = "Coordinates"
     id = Column(Integer, primary_key=True, autoincrement=True)
+
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    parentUser = relationship("User", back_populates="Coordinates")
+
     PRIMER_PUNTO_X = Column(Integer, nullable=False)
     PRIMER_PUNTO_Y = Column(Integer, nullable=False)
     PUNTO_MAS_ALTO_X = Column(Integer, nullable=False)
@@ -71,7 +92,18 @@ class Coordinates(db):
         self.T_SIGNAL_Y = int(lower_point_startQ[1])
         self.P_SIGNAL_X = int(lower_point_startP[0])
         self.P_SIGNAL_Y = int(lower_point_startP[1])
+class Chat(db):
+    __tablename__ = "Chat"
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
+    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    parentUser = relationship("User", back_populates="Chat")
+
+    msg = Column(String)
+    tipe = Column(Integer)
+    #-1 respuesta de chatbot
+    #1 msg de Paciente
+    date = Column(DateTime,default=datetime.datetime.now)
 '''# Uso de la clase
 first_point = (10, 20)
 lower_x_pos = 30
