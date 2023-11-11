@@ -11,8 +11,8 @@ from models import db, User, Login, Paciente, Doctor, Familiar
 from Comunicacion.Connections import RPC, UDP, MasterTCP
 #se declara un gestor de Base de datos mediante RPC
 #endPoindRPC=epRPC()
-rpc=RPC()
-udp=UDP('endpoint')
+#rpc=RPC()
+#udp=UDP('endpoint')
 #endPoindRPC.appJoined(db_CRUD)#se agregan entrada de instruciones para manejar la base de datos por RPC
 #se inicializa la API 
 app=Flask(__name__) 
@@ -264,10 +264,10 @@ def sincronice():#Sincronisacion UDP
         #os.system ("clear")
 
 if __name__=='__main__': 
-    sincronice()
+    #sincronice()
     #inicia el conexiones db con RPC
-    rpc.appOnion(f'http://{udp.Peers.get("vision")}:20064')#index 0
-    rpc.appOnion(f'http://{udp.Peers.get("prediccion")}:20064')#index 0
+    #rpc.appOnion(f'http://{udp.Peers.get("vision")}:20064')#index 0
+    #rpc.appOnion(f'http://{udp.Peers.get("prediccion")}:20064')#index 0
     db.init_app(app)#inicia el gestor db de la api
     
     with app.app_context():
