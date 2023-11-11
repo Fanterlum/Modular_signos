@@ -59,15 +59,15 @@ def bUpdate(id):
 
 @app.route('/userStatus/<id>')
 def Status(id):
-    return jsonify(rpc.getOnion[1].getStatus(id))
+    return jsonify(rpc.getOnion(1).getStatus(id))
 def StatusQ():
-    return jsonify(rpc.getOnion[1].getStatus(request.args.get( 'id' )))
+    return jsonify(rpc.getOnion(1).getStatus(request.args.get( 'id' )))
 
 @app.route('/userCoordinates/<id>')
 def Coordinates(id):
-    return jsonify(rpc.getOnion[0].getCoordinates(id))
+    return jsonify(rpc.getOnion(0).getCoordinates(id))
 def CoordinatesQ():
-    return jsonify(rpc.getOnion[0].getCoordinates(request.args.get( 'id' )))
+    return jsonify(rpc.getOnion(0).getCoordinates(request.args.get( 'id' )))
 
 '''def http_Delete():
     login= Login.query.filter_by(email = request.args.get( 'email' )).first()
@@ -264,10 +264,10 @@ def sincronice():#Sincronisacion UDP
         #os.system ("clear")
 
 if __name__=='__main__': 
-    #sincronice()
+    sincronice()
     #inicia el conexiones db con RPC
-    #rpc.appOnion(f'http://{udp.Peers.get("vision")}:20064')#index 0
-    #rpc.appOnion(f'http://{udp.Peers.get("prediccion")}:20064')#index 0
+    rpc.appOnion(f'http://{udp.Peers.get("vision")}:20064')#index 0
+    rpc.appOnion(f'http://{udp.Peers.get("prediccion")}:20064')#index 0
     db.init_app(app)#inicia el gestor db de la api
     
     with app.app_context():
