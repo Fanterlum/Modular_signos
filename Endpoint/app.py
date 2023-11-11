@@ -1,3 +1,4 @@
+import time,os
 #Se importa de flask los objetos que ocuparemos 
 from flask import Flask, request, jsonify
 
@@ -244,12 +245,12 @@ def drPatient():
 
 
 #funciones UDP
-def sincronice(dest):#Sincronisacion UDP
+def sincronice():#Sincronisacion UDP
     print('server sincronice!!! o_0')
     lost_Vision=True
     lost_Predict=True
-    while lost_Vision and lost_Predict:
-
+    while lost_Vision or lost_Predict:
+        print(udp.ipSource)
         if udp.Peers.get('vision',None):
             lost_Vision=False
         else:
@@ -259,6 +260,8 @@ def sincronice(dest):#Sincronisacion UDP
                 lost_Predict=False
         else:
             print('esperando [prediccion]')
+        time.sleep(5)
+        #os.system ("clear")
 
 if __name__=='__main__': 
     sincronice()
