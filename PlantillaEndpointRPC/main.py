@@ -96,10 +96,10 @@ if __name__=='__main__':
     print(endpoint_rpc.ipSource)
     while True:
         try:
-            print(f"server {nameDest} is {endpoint_rpc.getOnion[0].alive('okey?')}")
+            print(f"server {nameDest} is {endpoint_rpc.getOnion(0).alive('okey?')}")
         except:
             print('server error !!! 0_o')
-            sincronice()
+            addres=sincronice(nameDest)
         #if n==1 or n==2:
         udp.sendFlag((addres,DEFAULT_PORT_F),'func','genCache')
         time.sleep(15)
