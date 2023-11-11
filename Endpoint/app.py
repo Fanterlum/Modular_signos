@@ -11,8 +11,8 @@ from models import db, User, Login, Paciente, Doctor, Familiar
 from Comunicacion.Connections import RPC, UDP, MasterTCP
 #se declara un gestor de Base de datos mediante RPC
 #endPoindRPC=epRPC()
-#rpc=RPC()
-#udp=UDP('endpoint')
+rpc=RPC()
+udp=UDP('endpoint')
 #endPoindRPC.appJoined(db_CRUD)#se agregan entrada de instruciones para manejar la base de datos por RPC
 #se inicializa la API 
 app=Flask(__name__) 
@@ -283,4 +283,4 @@ if __name__=='__main__':
         app.add_url_rule('/Status',view_func=StatusQ)
         app.add_url_rule('/Coordinates',view_func=CoordinatesQ)
         #link?data1=dat
-    app.run(host='0.0.0.0',port=5000)#app.run(debug=True,port=puerto)#Depuración
+    app.run(host='0.0.0.0',port=5000,debug=False)#app.run(debug=True,port=puerto)#Depuración
