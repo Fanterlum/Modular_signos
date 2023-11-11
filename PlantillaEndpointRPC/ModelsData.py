@@ -9,7 +9,7 @@ db = declarative_base()
 
 # Definir la entidad User
 class User(db):
-    __tablename__ = "users"
+    __tablename__ = "User"
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     Status=relationship("Status", back_populates="parentUser")
@@ -38,7 +38,7 @@ class User(db):
 class CacheFiles(db):
     __tablename__ = "CacheFiles"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    ID_user=Column(Integer,ForeignKey('User.id'))
     parentUser = relationship("User", back_populates="CacheFiles")
     file = Column(LargeBinary)
     tipe = Column(String)
@@ -48,7 +48,7 @@ class Status(db):
     __tablename__ = "Status"
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    ID_user=Column(Integer,ForeignKey('User.id'))
     parentUser = relationship("User", back_populates="Status")
 
     data = Column(Integer, nullable=False)
@@ -60,7 +60,7 @@ class Coordinates(db):
     __tablename__ = "Coordinates"
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    ID_user=Column(Integer,ForeignKey('User.id'))
     parentUser = relationship("User", back_populates="Coordinates")
 
     PRIMER_PUNTO_X = Column(Integer, nullable=False)
@@ -92,18 +92,18 @@ class Coordinates(db):
         self.T_SIGNAL_Y = int(lower_point_startQ[1])
         self.P_SIGNAL_X = int(lower_point_startP[0])
         self.P_SIGNAL_Y = int(lower_point_startP[1])
-class Chat(db):
+'''class Chat(db):
     __tablename__ = "Chat"
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    ID_user=db.Column(db.Integer,ForeignKey('User.id'),unique = True, primary_key=True)
+    ID_user=Column(Integer,ForeignKey('User.id'))
     parentUser = relationship("User", back_populates="Chat")
 
     msg = Column(String)
     tipe = Column(Integer)
     #-1 respuesta de chatbot
     #1 msg de Paciente
-    date = Column(DateTime,default=datetime.datetime.now)
+    date = Column(DateTime,default=datetime.datetime.now)'''
 '''# Uso de la clase
 first_point = (10, 20)
 lower_x_pos = 30

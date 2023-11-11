@@ -1,7 +1,7 @@
 from ModelsData import db,Coordinates,Status
 from BDPluss import DBManager
 from Comunicacion.Connections import DEFAULT_PORT_F,RPC,UDP,Peer#,MasterTCP
-import time
+import time,os
 udp = UDP()
 #Status
 #Coordinates
@@ -44,6 +44,8 @@ def sincronice(dest):#Sincronisacion UDP
         ipDestino=udp.Peers.get(dest,None)
         if ipDestino:return ipDestino
         else:print(f'Esperando a {dest}')
+        time.sleep(5)
+        os.system ("clear")
 def alive(frace):#ping rpc
     if frace=='okey?':
         return 'okey'
@@ -54,11 +56,11 @@ if __name__=='__main__':
     print('1)   vision')
     print('2)   prediccion')
     print('3)   Bpi')
-    n=input('peer: ')
-    if n==1:
+    n=int(input('peer: '))
+    if n==2:
         nameDest='vision'
         name='prediccion'
-    elif n==2:
+    elif n==1:
         nameDest='prediccion'
         name='vision'
     elif n==3:
@@ -87,7 +89,7 @@ if __name__=='__main__':
         endpoint_rpc.Joined.register_function(getCoordinates)
     if n==3:
         pass
-    addres=sincronice()
+    addres=sincronice(nameDest)
     endpoint_rpc.starListener()
     endpoint_rpc.appOnion(f'http://{addres}:20064')
     
