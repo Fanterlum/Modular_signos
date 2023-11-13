@@ -1,6 +1,6 @@
 from ModelsData import db,Coordinates,Status
 from BDPluss import DBManager
-from Comunicacion.Connections import DEFAULT_PORT_F,RPC,UDP,Peer#,MasterTCP
+from Connections import DEFAULT_PORT_F,RPC,UDP,Peer#,MasterTCP
 import time,os
 udp = UDP()
 #Status
@@ -17,11 +17,17 @@ def setStatus(data):
     return 0
 
 def getCoordinates(id)-> dict:
-    print(id)
+    status=str(data_base.Conn.query(Coordinates).get(id))
+    print(f'drop:{status}')
     return id
 def setCoordinates(id):
-    print(id)
-    return id
+    new_Coordinate=Coordinates(id)
+    data_base.Conn.add(new_Coordinate)
+    data_base.Conn.commit()
+    #print(f'New:{new_Coordinate}')
+
+
+    return 0
 
 def newCache(id,block_files)-> dict:
     try:
@@ -52,7 +58,7 @@ def alive(frace):#ping rpc
     return False
     
 if __name__=='__main__': 
-    ipEndpoint=input('Endpoint ip: ')
+    #ipEndpoint=input('Endpoint ip: ')
     print('1)   vision')
     print('2)   prediccion')
     print('3)   Bpi')
@@ -89,19 +95,19 @@ if __name__=='__main__':
         endpoint_rpc.Joined.register_function(getCoordinates)
     if n==3:
         pass
-    addres=sincronice(nameDest)
+    #addres=sincronice(nameDest)
     endpoint_rpc.starListener()
-    endpoint_rpc.appOnion(f'http://{addres}:20064')
+    #endpoint_rpc.appOnion(f'http://{addres}:20064')
     
     print(endpoint_rpc.ipSource)
-    while True:
-        try:
-            print(f"server {nameDest} is {endpoint_rpc.getOnion(0).alive('okey?')}")
-        except:
-            print('server error !!! 0_o')
-            addres=sincronice(nameDest)
+    while True:pass
+        #try:
+           # print(f"server {nameDest} is {endpoint_rpc.getOnion(0).alive('okey?')}")
+        #except:
+        #    print('server error !!! 0_o')
+            #addres=sincronice(nameDest)
         #if n==1 or n==2:
-        udp.sendFlag((addres,DEFAULT_PORT_F),'func','genCache')
-        time.sleep(15)
+       # udp.sendFlag((addres,DEFAULT_PORT_F),'func','genCache')
+        #time.sleep(15)
         
 

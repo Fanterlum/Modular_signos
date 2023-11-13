@@ -62,7 +62,7 @@ class Coordinates(db):
 
     ID_user=Column(Integer,ForeignKey('User.id'))
     parentUser = relationship("User", back_populates="Coordinates")
-
+    # en caso de querer agragar ritmo cardiaco crear columnas de cada uno y abajo en el init agregar
     PRIMER_PUNTO_X = Column(Integer, nullable=False)
     PRIMER_PUNTO_Y = Column(Integer, nullable=False)
     PUNTO_MAS_ALTO_X = Column(Integer, nullable=False)
@@ -77,21 +77,22 @@ class Coordinates(db):
     T_SIGNAL_Y = Column(Integer, nullable=False)
     P_SIGNAL_X = Column(Integer, nullable=False)
     P_SIGNAL_Y = Column(Integer, nullable=False)
-    def __init__(self, first_point, lower_x_pos, lower_y, final_point, QSignal, QSignal2, lower_point_startQ, lower_point_startP):
-        self.PRIMER_PUNTO_X = int(first_point[0])
-        self.PRIMER_PUNTO_Y = int(first_point[1])
-        self.PUNTO_MAS_ALTO_X = int(lower_x_pos)
-        self.PUNTO_MAS_ALTO_Y = int(lower_y)
-        self.PUNTO_FINAL_X = int(final_point[0])
-        self.PUNTO_FINAL_Y = int(final_point[1])
-        self.Q_SIGNAL_X = int(QSignal[0])
-        self.Q_SIGNAL_Y = int(QSignal[1])
-        self.S_SIGNAL_X = int(QSignal2[0])
-        self.S_SIGNAL_Y = int(QSignal2[1])
-        self.T_SIGNAL_X = int(lower_point_startQ[0])
-        self.T_SIGNAL_Y = int(lower_point_startQ[1])
-        self.P_SIGNAL_X = int(lower_point_startP[0])
-        self.P_SIGNAL_Y = int(lower_point_startP[1])
+    def __init__(self,coordinates):
+        
+        self.PRIMER_PUNTO_X = int(coordinates['PRIMER_PUNTO_X'])
+        self.PRIMER_PUNTO_Y = int(coordinates['PRIMER_PUNTO_Y'])
+        self.PUNTO_MAS_ALTO_X = int(coordinates['PUNTO_MAS_ALTO_X'])
+        self.PUNTO_MAS_ALTO_Y = int(coordinates['PUNTO_MAS_ALTO_Y'])
+        self.PUNTO_FINAL_X = int(coordinates['PUNTO_FINAL_X'])
+        self.PUNTO_FINAL_Y = int(coordinates['PUNTO_FINAL_Y'])
+        self.Q_SIGNAL_X = int(coordinates['Q_SIGNAL_X'])
+        self.Q_SIGNAL_Y = int(coordinates['Q_SIGNAL_Y'])
+        self.S_SIGNAL_X = int(coordinates['S_SIGNAL_X'])
+        self.S_SIGNAL_Y = int(coordinates['S_SIGNAL_Y'])
+        self.T_SIGNAL_X = int(coordinates['T_SIGNAL_X'])
+        self.T_SIGNAL_Y = int(coordinates['T_SIGNAL_Y'])
+        self.P_SIGNAL_X = int(coordinates['P_SIGNAL_X'])
+        self.P_SIGNAL_Y = int(coordinates['P_SIGNAL_Y'])
 '''class Chat(db):
     __tablename__ = "Chat"
     id = Column(Integer, primary_key=True, autoincrement=True)
