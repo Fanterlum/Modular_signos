@@ -11,6 +11,11 @@
 ##################################################
 
 
+#RPC
+from PlantillaEndpointRPC.Connections import RPC
+
+
+
 import json
 import os
 import sys
@@ -24,6 +29,12 @@ import pytesseract
 
 tiempo_inicio = time.time()
 
+#Conexion con rpc
+rpc = RPC()
+rpc.appOnion(f'http://{rpc.ipSource}:20064')#index 0
+
+
+# ------------------------------ Código para detectar contornos ------------------------------
 # Directorio que contiene las imágenes
 image_dir_cont = 'IMG/JOSE_RAMON2/CONTORNO'
 
@@ -102,6 +113,9 @@ image_files = [f for f in os.listdir(image_dir) if f.endswith('.png') or f.endsw
 
 # Lista para almacenar los resultados
 resultados = []
+
+
+    
 
 for image_file in image_files:
     
@@ -246,6 +260,11 @@ for image_file in image_files:
     # Show the plot
     #plt.show()
 
+    #Conexion
+
+    # agregado para pasar directo a lo demas
+    rpc.getOnion(0).setCoordinates(coordinates)
+    print(rpc.getOnion(0).setCoordinates(coordinates))
 # ------------------------------ Código para detectar números ------------------------------
 
 # Cargar la lista de nombres de archivos ya procesados
