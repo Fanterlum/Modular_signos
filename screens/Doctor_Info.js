@@ -49,8 +49,12 @@ const Doctor_Info = () => {
       </View>
       <View style={styles.Patient_StatusContainer}>
       </View>
-      <View style={styles.chatbotContainer}>
-      <ButtonChatbox></ButtonChatbox>
+      <View style={styles.botContainer}>
+        {/* botContainer se superpondrá sobre los demás elementos */}
+        <View style={styles.buttonChatboxContainer}>
+          {/* ButtonChatbox se posicionará en la mitad de la pantalla */}
+          <ButtonChatbox></ButtonChatbox>
+        </View>
       </View>
     </View>
   )

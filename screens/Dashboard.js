@@ -48,46 +48,48 @@ const Dashboard = ({ navigation, route }) => {
     <View style={styles.mainContainer}>
       <View style={styles.topContainer}>
         {Json ? (
-            <Text style={[styles.title,{fontSize:responsiveSize}]}>Bienvenido {Json.username} {primerApellido}</Text>
-        ):
-        <Text style={[styles.title,{fontSize:responsiveSize}]}>Cargando...</Text>
-        }
+          <Text style={[styles.title, { fontSize: responsiveSize }]}>
+            Bienvenido {Json.username} {primerApellido}
+          </Text>
+        ) : (
+          <Text style={[styles.title, { fontSize: responsiveSize }]}>Cargando...</Text>
+        )}
       </View>
       <View style={styles.midContainer}>
-      <TouchableOpacity style={styles.boton}
-        onPress={() => {
-          // Redirige a la vista deseada al hacer clic en la imagen
-          navigation.navigate('Paciente');
-        }}
-      >
-        <Image source={patientBanner} style={[styles.BannerPatient,{height: image1Height, width: image1Width}]}
-        />
-        <Text style={[styles.buttonTitles,{left: "11%"}]}>Ver informacion sobre el paciente</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.boton}
-        onPress={() => {
-        // Redirige a la vista deseada al hacer clic en la imagen
-        navigation.navigate('Doctor');
-        }}
-      >
-        <Image source={doctorBanner} style={[styles.BannerPatient,{height: image1Height, width: image1Width}]}
-          />
-        <Text style={[styles.buttonTitles,{left: "14%"}]}>Ver informacion sobre el doctor</Text>
-
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.boton}
+        <TouchableOpacity
+          style={styles.boton}
           onPress={() => {
-            // Redirige a la vista deseada al hacer clic en la imagen
-            navigation.navigate('Lista de pacientes');
-            }}
+            navigation.navigate('Paciente');
+          }}
         >
-          <Image source={doctor2Banner} style={[styles.BannerPatient,{height: image1Height, width: image1Width}]}
-            />
-        <Text style={[styles.buttonTitles,{left: "25%"}]}>Ver lista de pacientes</Text>
+          <Image source={patientBanner} style={[styles.BannerPatient, { height: image1Height, width: image1Width }]} />
+          <Text style={[styles.buttonTitles, { left: "11%" }]}>Ver informacion sobre el paciente</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.boton}
+          onPress={() => {
+            navigation.navigate('Doctor');
+          }}
+        >
+          <Image source={doctorBanner} style={[styles.BannerPatient, { height: image1Height, width: image1Width }]} />
+          <Text style={[styles.buttonTitles, { left: "14%" }]}>Ver informacion sobre el doctor</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.boton}
+          onPress={() => {
+            navigation.navigate('Lista de pacientes');
+          }}
+        >
+          <Image source={doctor2Banner} style={[styles.BannerPatient, { height: image1Height, width: image1Width }]} />
+          <Text style={[styles.buttonTitles, { left: "25%" }]}>Ver lista de pacientes</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.botContainer}>
-        <ButtonChatbox></ButtonChatbox>
+        {/* botContainer se superpondrá sobre los demás elementos */}
+        <View style={styles.buttonChatboxContainer}>
+          {/* ButtonChatbox se posicionará en la mitad de la pantalla */}
+          <ButtonChatbox></ButtonChatbox>
+        </View>
       </View>
     </View>
   );
@@ -116,6 +118,7 @@ const styles = StyleSheet.create({
   mainContainer:{
     width:"100%",
     height: "100%",
+    flex:1,
   },
   topContainer:{
     width:"100%",
@@ -131,12 +134,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  botContainer:{
-    width:"100%",
-    height: "15%",
-    backgroundColor: "white",
-    justifyContent: 'flex-end', // Align the button and chatbox to the bottom
-    alignItems: 'flex-end', // Align the button and chatbox to the right
+  botContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    // Otros estilos para botContainer
+  },
+  buttonChatboxContainer: {
+    position: 'absolute',
+    bottom: '50%', // Coloca ButtonChatbox en la mitad de la pantalla
+    left: 0,
+    right: 0,
+    // Otros estilos para el contenedor de ButtonChatbox si es necesario
   },
   title:{
     fontWeight: "bold",

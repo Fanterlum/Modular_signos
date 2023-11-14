@@ -70,9 +70,19 @@ export const styles = StyleSheet.create({
       height: "85%",
       borderRadius: 100,
     },
-    chatbot: {
-      width: "60%",
-      height: "90%",
+    botContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      // Otros estilos para botContainer
+    },
+    buttonChatboxContainer: {
+      position: 'absolute',
+      bottom: '50%', // Coloca ButtonChatbox en la mitad de la pantalla
+      left: 0,
+      right: 0,
+      // Otros estilos para el contenedor de ButtonChatbox si es necesario
     },
     DataText: {
       marginTop: "2%",

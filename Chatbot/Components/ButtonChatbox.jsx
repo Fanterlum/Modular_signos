@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, PixelRatio} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Chatbox from './Chatbox/Chatbox';
-//Foto del bot
-
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome'
 
 const ButtonChatbox = () => {
   const [showChatbox, setShowChatbox] = useState(false);
@@ -10,9 +9,7 @@ const ButtonChatbox = () => {
   const handleButtonPress = () => {
     setShowChatbox(!showChatbox);
   };
-  const botPhoto = require('../../assets/bot-icon.png');
-  //Tamaño responsive para el bot
-  const responsivePhoto = PixelRatio.getPixelSizeForLayoutSize(20); // 50 DP
+
   return (
     <View style={styles.container}>
       {showChatbox && <Chatbox />}
@@ -20,9 +17,12 @@ const ButtonChatbox = () => {
         style={styles.chatboxButton}
         onPress={handleButtonPress}
       >
-        <Image source={botPhoto} style={[{height: responsivePhoto}, {width: responsivePhoto}]}
-                resizeMode="contain" // Controla cómo se ajusta la imagen
-                />
+        <FontAwesomeIcon
+          name='comments-o'
+          size={25}
+          color={'#fff'}
+        />
+        
       </TouchableOpacity>
     </View>
   );
@@ -33,11 +33,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end', // Align the button and chatbox to the bottom
     alignItems: 'flex-end', // Align the button and chatbox to the right
-    marginBottom: "3%", // Adjust the margin as needed
-    marginRight: "5%", // Adjust the margin as needed
+    marginBottom: 20, // Adjust the margin as needed
+    marginRight: 20, // Adjust the margin as needed
   },
-  chatboxButton: {
-    padding: "3%",
+  chatboxButton: {  
+    backgroundColor: '#3449eb',
+    padding: 10,
+    borderRadius: 20,
   },
 });
 

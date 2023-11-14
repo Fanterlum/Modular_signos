@@ -57,14 +57,12 @@ const Patient_Info = ({navigation}) => {
         <Text style={styles.StatusText}>Status Futuro: {TextAssigner({ numero: FutureState })}</Text>
       </View>
       </View>
-      <View style={styles.chatbotContainer}>
-      <TouchableOpacity style={[styles.historial]} onPress={navigateToHistory}>
-        <Text style={[styles.StatusText, {marginLeft: "10%",}]}>Historial Clinico</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.estadistica]} onPress={navigateToStatistics}>
-        <Text style={[styles.StatusText, {marginLeft: "13%",}]}>Señal Actual</Text>
-      </TouchableOpacity>
-        <ButtonChatbox></ButtonChatbox>
+      <View style={styles.botContainer}>
+        {/* botContainer se superpondrá sobre los demás elementos */}
+        <View style={styles.buttonChatboxContainer}>
+          {/* ButtonChatbox se posicionará en la mitad de la pantalla */}
+          <ButtonChatbox></ButtonChatbox>
+        </View>
       </View>
     </View>
   )
