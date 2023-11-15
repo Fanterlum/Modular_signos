@@ -81,7 +81,7 @@ const Statistics = ({route}) => {
       }
     };
     fetchDataWithId(userId); // Llama a la función de carga de datos cuando userId cambie
-  }, [userId]); // Esto asegura que se llame cuando userId cambie
+  }, []); // Esto asegura que se llame cuando userId cambie
   console.log(SignalData);
   
   return (

@@ -126,7 +126,7 @@ const Statistics = ({ route }) => {
       }
     };
     fetchDataWithId(userId);
-  }, [userId]);
+  }, []);
 
   console.log(lastRecord);
   console.log(weeklyAverage);

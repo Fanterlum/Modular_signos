@@ -22,10 +22,13 @@ const Patient_ID_info = ({route}) => {
   const [nombre, setNombre] = useState("Cargando..."); // Variable para el nombre
   const [apellido, setApellido] = useState("Cargando..."); // Variable para el apellido
   const [edad, setEdad] = useState('22'); // Variable para la edad
-    const userId = route.params?.userId;
-    const {Json} = useJson();
-    const [data, setData] = useState(null);
- 
+  const userId = route.params?.userId;
+  const {Json} = useJson();
+  const [data, setData] = useState(null);
+  //Aqui van los estados del paciente
+  const [ActualState, setActualState] = useState(1); //ESTADO ACTUAL
+  const [FutureState, setFutureStare] = useState(2); //Estado futuro
+
     useEffect(() => {
       const fetchDataWithId = async (id) => {
         try {
@@ -33,13 +36,15 @@ const Patient_ID_info = ({route}) => {
           const jsonData = await GetInfo(id);
           setNombre(jsonData.username);
           setApellido(jsonData.apellidos);
+          setActualState(jsonData.status);
           // Puedes actualizar otras variables de estado según sea necesario
         } catch (error) {
           console.error('Error al obtener el JSON:', error);
         }
       };
-      fetchDataWithId(userId); // Llama a la función de carga de datos cuando userId cambie
-    }, [userId]); // Esto asegura que se llame cuando userId cambie
+      fetchDataWithId(userId);
+    }, []);
+
     let primerApellido = '';
     if (Json && Json.apellidos) {
       const apellidosArray = Json.apellidos.split(' '); // Divide la cadena de apellidos en un array
@@ -49,9 +54,6 @@ const Patient_ID_info = ({route}) => {
     }
 
     const [Doctor, setDoctor] = useState(Json.username + " " + primerApellido); // Variable para la edad
-    //Aqui van los estados del paciente
-    const [ActualState, setActualState] = useState(1); //ESTADO ACTUAL
-    const [FutureState, setFutureStare] = useState(2); //Estado futuro
     //Aqui va la ruta o la peticion a la imagen del paciente
     const imageUrl = require('../assets/Sample/Patient.jpeg');
     const navigateToStatistics = (userId) => {

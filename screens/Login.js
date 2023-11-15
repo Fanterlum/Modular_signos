@@ -28,6 +28,7 @@ const Login = () => {
   const {setEmail} = useEmail();
   const { setJson } = useJson();
   const navigation = useNavigation();
+  navigation.navigate('Home'); // Navegar a la pantalla HomeScreen
 
   const [Correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');

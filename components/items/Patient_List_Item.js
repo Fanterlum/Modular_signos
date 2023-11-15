@@ -13,7 +13,7 @@ const Patient_List_Item = ({paciente}) => {
   const [nombre, setNombre] = useState(paciente.username); // Variable para el nombre
   const [apellido, setApellido] = useState(paciente.apellidos); // Variable para el apellido
   //Aqui van los estados del paciente
-  const [ActualState, setActualState] = useState(1); //ESTADO ACTUAL paciente.estado
+  const [ActualState, setActualState] = useState(paciente.status); //ESTADO ACTUAL paciente.estado
   const navigation = useNavigation(); // Obtiene el objeto de navegación
 
   const handleViewDetails = (id) => {
