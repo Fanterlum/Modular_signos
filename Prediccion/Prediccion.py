@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
 import os
 import pathlib
@@ -13,6 +14,11 @@ class Regression:
         # Datos de ejemplo
         self.x = np.array([2, 4, 8, 16, 64])
         self.y = np.array([1, 3, 1, 3, 1])
+        a=[i for i in range(-30,30)]
+        self.a1= np.array(a)
+        self.a2= np.array(a)
+        self.a3= np.array(a)
+        self.a4= np.array(a)
 
     def data_show(self):
         plt.scatter(self.x,self.y)
@@ -30,7 +36,7 @@ class Regression:
     # Calcular los coeficientes de la regresión no lineal (a,b,c)
     def CalcularC_NoLineares(self):
         self.popt_f1, pcov_f1 = curve_fit(self.model_f1, self.x, self.y)
-        #self.popt_f2, pcov_f2 = curve_fit(self.model_f2, self.x, self.y)
+        self.popt_fg4, pcov_fg4 = curve_fit(self.model_fg4, self.x, self.y)
         self.popt_Gaus, pcov_Gaus = curve_fit(self.model_G, self.x, self.y)
 
     # Crear la función de regresión lineal
@@ -42,6 +48,8 @@ class Regression:
     # Crear la función gauss
     def model_G(self,x,A,mu,sig):
         return A*np.exp(-(x-mu)**2/sig**2)
+    def model_fg4(self,x,a4,a3,a2,a1,c):
+        return (a4*x**4)+(a3*x**3)+(a2*x**2)+(a1*x)+c
     # Crear la función
     '''def model_f2(self,r, sigma, epsilon):
         return 4*epsilon*((sigma/r)**12-(sigma/r)**6)'''
@@ -59,9 +67,9 @@ class Regression:
         elif model=="Gauss":
             a_opt, b_opt, c_opt = self.popt_Gaus
             y_model = self.model_G(x_model, a_opt, b_opt, c_opt)
-        '''elif model=="F2":
-            a_opt, b_opt, c_opt = self.popt_f2
-            y_model = self.model_f2(x_model, a_opt, b_opt)'''
+        elif model=="FG4":
+            a4_opt, a3_opt, a2_opt, a1_opt = self.popt_fg4
+            y_model = self.model_fg4(x_model, a4_opt, a3_opt, a2_opt, a1_opt)
         # Visualizar los datos y la línea de regresión
         plt.scatter(self.x, self.y, label=self.name_Data)
         plt.plot(x_model,y_model, color='r')
@@ -102,7 +110,217 @@ class CardiacMetrics:
             optimizer=tf.keras.optimizers.Adam(0.1),
             loss='mean_squared_error'
         )
+    def load_Data(self,FolderMetrics="paciente"):
+        #ondas=[]
+        ondas_INI=[]
+        ondas_p=[]
+        ondas_q=[]
+        ondas_r=[]
+        ondas_s=[]
+        ondas_t=[]
+        ondas_FINAL=[]
+        if not FolderMetrics is None:
+            #se odtiene la ruta acsoluta 
+            # y se concatena con el nombre de la carpeta
+            dir = f'{os.getcwd()}/{FolderMetrics}/'
+            #se revisa el contenido de la carpeta
+            directorio = pathlib.Path(dir)
+            #se crea una lista para guardar los nombres de los archivos 
+            filesNames = []
+            #se recore cada fichero para filtrar los archivos
+            for fichero in directorio.iterdir():
+                if fichero.is_file():
+                    filesNames.append(fichero.name)
+                    #se organizan los nombres de los archivos 
+                    filesNames.sort()
+        nFile=0
+        for file in filesNames:
+            with open(dir+file,"r") as f:
+                data = json.load(f)
+            nFile+=1
+            ondas_INI.append((
+                #ini
+            600-data["PRIMER_PUNTO_Y"],#0
+            data["PRIMER_PUNTO_X"],#1
+            nFile
+            ))
+            ondas_p.append((
+                #P
+            600-data["P_SIGNAL_Y"],#0
+            data["P_SIGNAL_X"],#1
+            nFile
+            ))
+            ondas_q.append((
+                #Q
+            600-data["Q_SIGNAL_Y"],#0
+            data["Q_SIGNAL_X"],#1
+            nFile
+            ))
 
+            ondas_r.append((
+                #PA
+            600-data["PUNTO_MAS_ALTO_Y"],#0
+            data["PUNTO_MAS_ALTO_X"],#1
+            nFile
+            ))
+
+            ondas_s.append((
+                #S
+            600-data["S_SIGNAL_Y"],#0
+            data["S_SIGNAL_X"],#1
+            nFile
+            ))
+            ondas_t.append((
+                #T
+            600-data["T_SIGNAL_Y"],#0
+            data["T_SIGNAL_X"],#1
+            nFile
+            ))
+            ondas_FINAL.append((
+                #fin
+            600-data["PUNTO_FINAL_Y"],#0
+            data["PUNTO_FINAL_X"],#1
+            nFile
+            ))
+        
+        order_INI=sorted(ondas_INI,key=lambda onda : onda[1])
+        
+        order_p=sorted(ondas_p,key=lambda onda : onda[1])
+        order_q=sorted(ondas_q,key=lambda onda : onda[1])
+
+        order_r=sorted(ondas_r,key=lambda onda : onda[1])
+
+        order_s=sorted(ondas_s,key=lambda onda : onda[1])
+        order_t=sorted(ondas_t,key=lambda onda : onda[1])
+
+        order_FINAL=sorted(ondas_FINAL,key=lambda onda : onda[1])
+
+        # Creamos la figura
+        fig = plt.figure()
+
+        # Agrrgamos un plano 3D
+        ax = plt.axes(projection='3d')
+        
+        ax.scatter(
+            [onda[1] for onda in order_INI],
+            [onda[0] for onda in order_INI],
+            [onda[2] for onda in order_INI],
+            c='g',
+            marker='o'
+        )
+        ax.scatter(
+            [onda[1] for onda in order_p],
+            [onda[0] for onda in order_p],
+            [onda[2] for onda in order_p],
+            c='b',
+            marker='o'
+        )
+        ax.scatter(
+            [onda[1] for onda in order_q],
+            [onda[0] for onda in order_q],
+            [onda[2] for onda in order_q],
+            c='y',
+            marker='o'
+        )
+        ax.scatter(
+            [onda[1] for onda in order_r],
+            [onda[0] for onda in order_r],
+            [onda[2] for onda in order_r],
+            c='r',
+            marker='o'
+        )
+        ax.scatter(
+            [onda[1] for onda in order_s],
+            [onda[0] for onda in order_s],
+            [onda[2] for onda in order_s],
+            c='c',
+            marker='o'
+        )
+        ax.scatter(
+            [onda[1] for onda in order_t],
+            [onda[0] for onda in order_t],
+            [onda[2] for onda in order_t],
+            c='b',
+            marker='o'
+        )
+        ax.scatter(
+            [onda[1] for onda in order_FINAL],
+            [onda[0] for onda in order_FINAL],
+            [onda[2] for onda in order_FINAL],
+            c='g',
+            marker='o'
+        )
+            
+        ax.set_title("3d Line plot in Matplotlib", fontsize=14, fontweight="bold")
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_zlabel("nOndas")
+        
+        plt.show()
+        #orderOndas=sorted(ondas,key=lambda onda : onda[1])
+        #nOndas=len(order_r)
+        #x_list=[x for x in range(nOndas)]
+        #x_list=[onda[4] for onda in orderOndas]
+        self.rPRIMER_PUNTO.fit(
+            [
+                [onda[1] for onda in order_INI],
+                [onda[0] for onda in order_INI]
+            ]
+        )
+
+        self.rP_SIGNAL.fit(
+            [
+                [onda[1] for onda in order_p],
+                [onda[0] for onda in order_p]
+            ]
+        )
+        self.rQ_SIGNAL.fit(
+            [
+                [onda[1] for onda in order_q],
+                [onda[0] for onda in order_q]
+            ]
+        )
+
+        self.rPUNTO_MAS_ALTO.fit(
+            [
+                [onda[1] for onda in order_r],
+                [onda[0] for onda in order_r]
+            ]
+        )
+        
+        self.rS_SIGNAL.fit(
+            [
+                [onda[1] for onda in order_s],
+                [onda[0] for onda in order_s]
+            ]
+        )
+        self.rT_SIGNAL.fit(
+            [
+                [onda[1] for onda in order_t],
+                [onda[0] for onda in order_t]
+            ]
+        )
+
+        self.rPUNTO_FINAL.fit(
+            [
+                [onda[1] for onda in order_FINAL],
+                [onda[0] for onda in order_FINAL]
+            ]
+        )
+
+        self.rPRIMER_PUNTO.CalcularC_Lineares()
+        
+        
+        self.rP_SIGNAL.CalcularC_NoLineares()
+        self.rQ_SIGNAL.CalcularC_NoLineares()
+
+        #self.rPUNTO_MAS_ALTO.CalcularC_Lineares()
+
+        #self.rS_SIGNAL.CalcularC_NoLineares()
+        self.rT_SIGNAL.CalcularC_Lineares()
+        
+
+        self.rPUNTO_FINAL.CalcularC_Lineares()
     def statusFibrilacion(self,p,q,r,s,t):
         tolerancia=10
         if p>(r-tolerancia):
@@ -149,94 +367,13 @@ class CardiacMetrics:
             onda[5])+self.statusTaquicardia(onda[2],onda[4])
 
     def fit(self,FolderMetrics="paciente"):
-        '''pRIMER_PUNTO =[]
-        pUNTO_MAS_ALTO =[]
-        pUNTO_FINAL =[]
-        q_SIGNAL =[]
-        s_SIGNAL =[]
-        t_SIGNAL =[]
-        p_SIGNAL =[]'''
-        ondas=[]
-        if not FolderMetrics is None:
-            #se odtiene la ruta acsoluta 
-            # y se concatena con el nombre de la carpeta
-            dir = f'{os.getcwd()}/{FolderMetrics}/'
-            #se revisa el contenido de la carpeta
-            directorio = pathlib.Path(dir)
-            #se crea una lista para guardar los nombres de los archivos 
-            filesNames = []
-            #se recore cada fichero para filtrar los archivos
-            for fichero in directorio.iterdir():
-                if fichero.is_file():
-                    filesNames.append(fichero.name)
-                    #se organizan los nombres de los archivos 
-                    filesNames.sort()
-        for file in filesNames:
-            with open(dir+file,"r") as f:
-                data = json.load(f)
-
-            ondas.append(
-            (500-data["PRIMER_PUNTO_Y"],
-             
-            500-data["P_SIGNAL_Y"],
-            500-data["Q_SIGNAL_Y"],
-
-            500-data["PUNTO_MAS_ALTO_Y"],
-
-            500-data["S_SIGNAL_Y"],
-            500-data["T_SIGNAL_Y"],
-
-            500-data["PUNTO_FINAL_Y"]))
-
-            '''500-data["PRIMER_PUNTO_Y"],
-            500-data["PUNTO_MAS_ALTO_Y"],
-            500-data["PUNTO_FINAL_Y"],
-            500-data["Q_SIGNAL_Y"],
-            500-data["S_SIGNAL_Y"],
-            500-data["T_SIGNAL_Y"],
-            500-data["P_SIGNAL_Y"]'''
         
-        '''pRIMER_PUNTO.sort()
-        pUNTO_MAS_ALTO.sort()
-        pUNTO_FINAL.sort()
-        q_SIGNAL.sort()
-        s_SIGNAL.sort()
-        t_SIGNAL.sort()
-        p_SIGNAL.sort()'''
-
-        orderOndas=sorted(ondas,key=lambda onda : onda[2])
-        nOndas=len(orderOndas)
-        #x_list=[x for x in range(nOndas)]
-        x_list=[onda[4] for onda in orderOndas]
-        self.rPRIMER_PUNTO.fit([x_list,[onda[0] for onda in orderOndas]])
-
-        self.rP_SIGNAL.fit([x_list,[onda[1] for onda in orderOndas]])
-        self.rQ_SIGNAL.fit([x_list,[onda[2] for onda in orderOndas]])
-
-        self.rPUNTO_MAS_ALTO.fit([x_list,[onda[3] for onda in orderOndas]])
-        
-        #self.rS_SIGNAL.fit([x_list,[onda[4] for onda in orderOndas]])
-        self.rT_SIGNAL.fit([x_list,[onda[5] for onda in orderOndas]])
-
-        self.rPUNTO_FINAL.fit([x_list,[onda[6] for onda in orderOndas]])
-
-        self.rPRIMER_PUNTO.CalcularC_Lineares()
-        
-        
-        self.rP_SIGNAL.CalcularC_NoLineares()
-        self.rQ_SIGNAL.CalcularC_NoLineares()
-
-        #self.rPUNTO_MAS_ALTO.CalcularC_Lineares()
-
-        #self.rS_SIGNAL.CalcularC_NoLineares()
-        self.rT_SIGNAL.CalcularC_Lineares()
-        
-
-        self.rPUNTO_FINAL.CalcularC_Lineares()
         print("Comenzando entrenamiento...")
-        model_Q=np.array([self.rQ_SIGNAL.predict(x_list[i],"F1") for i in range(nOndas)], dtype=int)
-        model_S=np.array(x_list, dtype=int)
-        simetria= self.modelo.fit(model_Q, model_S, epochs=45, verbose=False)
+        '''model_Q=np.array([self.rQ_SIGNAL.predict(x_list[i],"F1") for i in range(nOndas)], dtype=int)
+        model_S=np.array(x_list, dtype=int)'''
+        distQR=np.array([])
+        distSR=np.array([])
+        simetria= self.modelo.fit(distQR, distSR, epochs=45, verbose=False)
         print("Modelo entrenado!")
 
         '''plt.xlabel("# Epoca")

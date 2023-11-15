@@ -2,6 +2,7 @@
 from Prediccion import CardiacMetrics
 
 test=CardiacMetrics()
-test.fit()
-test.show_test()
+test.load_Data()
+'''test.fit()
+test.show_test()'''
 
