@@ -77,6 +77,10 @@ class Coordinates(db):
     T_SIGNAL_Y = Column(Integer, nullable=False)
     P_SIGNAL_X = Column(Integer, nullable=False)
     P_SIGNAL_Y = Column(Integer, nullable=False)
+    RCARDIACO = Column(Integer, nullable=False)
+    OXIGENATION = Column(Integer, nullable=False)
+    FRECRESP = Column(Integer, nullable=False)
+
     def __init__(self,coordinates):
         
         self.PRIMER_PUNTO_X = int(coordinates['PRIMER_PUNTO_X'])
@@ -93,6 +97,31 @@ class Coordinates(db):
         self.T_SIGNAL_Y = int(coordinates['T_SIGNAL_Y'])
         self.P_SIGNAL_X = int(coordinates['P_SIGNAL_X'])
         self.P_SIGNAL_Y = int(coordinates['P_SIGNAL_Y'])
+        self.RCARDIACO = int(coordinates['RCARDIACO'])
+        self.OXIGENATION = int(coordinates['OXIGENATION'])
+        self.FRECRESP = int(coordinates['FRECRESP'])
+
+    """def diccionario(self):
+
+        return {
+            'PRIMER_PUNTO_X':self.PRIMER_PUNTO_X,
+            'PRIMER_PUNTO_Y':self.PRIMER_PUNTO_Y,
+            'PUNTO_MAS_ALTO_X':self.PUNTO_MAS_ALTO_X,
+            'PUNTO_MAS_ALTO_Y':self.PUNTO_MAS_ALTO_Y,
+            'PUNTO_FINAL_X':self.PUNTO_FINAL_X,|1
+            'PUNTO_FINAL_Y':self.PUNTO_FINAL_Y,
+            'Q_SIGNAL_X':self.Q_SIGNAL_X ,
+            'Q_SIGNAL_Y':self.Q_SIGNAL_Y ,
+            'S_SIGNAL_X':self.S_SIGNAL_X ,
+            'S_SIGNAL_Y':self.S_SIGNAL_Y ,
+            'T_SIGNAL_X':self.T_SIGNAL_X ,
+            'T_SIGNAL_Y':self.T_SIGNAL_Y ,
+            'P_SIGNAL_X':self.P_SIGNAL_X ,
+            'P_SIGNAL_Y':self.P_SIGNAL_Y ,
+            'RCARDIACO':self.RCARDIACO ,
+            'OXIGENATION':self.OXIGENATION ,
+            'FRECRESP':self.FRECRESP
+        }"""
 '''class Chat(db):
     __tablename__ = "Chat"
     id = Column(Integer, primary_key=True, autoincrement=True)
