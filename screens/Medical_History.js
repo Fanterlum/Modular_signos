@@ -3,10 +3,12 @@ import { View, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import Svg, { Line, Circle, Rect, Text } from 'react-native-svg';
 import { Text as RNText } from 'react-native';
 import GetGraph from '../backend/GetGraph';
+import GetPromGraph from '../backend/GetPromGraph';
+import { useFocusEffect } from '@react-navigation/native';
 
 const MedicalHistoryGraph = ({ SignalData }) => {
   const graphWidth = SignalData.PUNTO_FINAL_X + 10;
-  const graphHeight = 300;
+  const graphHeight = 380;
   const backgroundColor = 'white';
   const gridLineColor = 'red';
   const gridSize = 20;
@@ -72,61 +74,53 @@ const Statistics = ({ route }) => {
   const userId = route.params?.userId;
   const [lastRecord, setLastRecord] = useState();
   const [weeklyAverage, setWeeklyAverage] = useState();
-
-  useEffect(() => {
-    const fetchDataWithId = async (id) => {
-      try {
-        // Simulación de datos de electrocardiograma para el último registro
-        const lastRecordData = {
-          PRIMER_PUNTO_X: 30,
-          PRIMER_PUNTO_Y: 150,
-          P_SIGNAL_X: 70,
-          P_SIGNAL_Y: 120,
-          Q_SIGNAL_X: 110,
-          Q_SIGNAL_Y: 180,
-          PUNTO_MAS_ALTO_X: 150,
-          PUNTO_MAS_ALTO_Y: 90,
-          S_SIGNAL_X: 190,
-          S_SIGNAL_Y: 170,
-          T_SIGNAL_X: 230,
-          T_SIGNAL_Y: 130,
-          PUNTO_FINAL_X: 270,
-          PUNTO_FINAL_Y: 150,
-           // Llama a la función GetInfo para obtener datos basados en el ID
-          //const jsonData = await GetGraph(id);
-          //setSignalData(jsonData);
-          // Puedes actualizar otras variables de estado según sea necesario
-        };
-        setLastRecord(lastRecordData);
-
-        // Simulación de datos de electrocardiograma para el promedio semanal
-        const weeklyAverageData = {
-          PRIMER_PUNTO_X: 45,
-          PRIMER_PUNTO_Y: 170,
-          P_SIGNAL_X: 90,
-          P_SIGNAL_Y: 130,
-          Q_SIGNAL_X: 100,
-          Q_SIGNAL_Y: 190,
-          PUNTO_MAS_ALTO_X: 160,
-          PUNTO_MAS_ALTO_Y: 100,
-          S_SIGNAL_X: 200,
-          S_SIGNAL_Y: 180,
-          T_SIGNAL_X: 240,
-          T_SIGNAL_Y: 140,
-          PUNTO_FINAL_X: 290,
-          PUNTO_FINAL_Y: 170,
-          // Llama a la función GetInfo para obtener datos basados en el ID
-          //const jsonData = await GetGraph(id);
-          //setSignalData(jsonData);
-          // Puedes actualizar otras variables de estado según sea necesario
-        };
-        setWeeklyAverage(weeklyAverageData);
-      } catch (error) {
-        console.error('Error al obtener el JSON:', error);
-      }
-    };
-    fetchDataWithId(userId);
-  }, []);
+  const getRandomNumber = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      const randomData = {
+        PRIMER_PUNTO_X: 0,
+        PRIMER_PUNTO_Y: getRandomNumber(300, 331),
+        PUNTO_MAS_ALTO_X: getRandomNumber(100, 120),
+        PUNTO_MAS_ALTO_Y: getRandomNumber(30, 60),
+        PUNTO_FINAL_X: getRandomNumber(255, 270),
+        PUNTO_FINAL_Y: getRandomNumber(320, 350),
+        Q_SIGNAL_X: getRandomNumber(90, 110),
+        Q_SIGNAL_Y: getRandomNumber(330, 370),
+        S_SIGNAL_X: getRandomNumber(130, 150),
+        S_SIGNAL_Y: getRandomNumber(320, 360),
+        T_SIGNAL_X: getRandomNumber(200, 215),
+        T_SIGNAL_Y: getRandomNumber(260, 300),
+        P_SIGNAL_X: getRandomNumber(40, 50),
+        P_SIGNAL_Y: getRandomNumber(280, 290),
+        OXIGENACION: getRandomNumber(80, 98),
+        RITMOCARDIACO: getRandomNumber(60, 100),
+        RESP: getRandomNumber(12, 24),
+      };
+      setLastRecord(randomData);
+      const randomData2 = {
+        PRIMER_PUNTO_X: 0,
+        PRIMER_PUNTO_Y: getRandomNumber(300, 331),
+        PUNTO_MAS_ALTO_X: getRandomNumber(100, 120),
+        PUNTO_MAS_ALTO_Y: getRandomNumber(30, 60),
+        PUNTO_FINAL_X: getRandomNumber(255, 270),
+        PUNTO_FINAL_Y: getRandomNumber(320, 350),
+        Q_SIGNAL_X: getRandomNumber(90, 110),
+        Q_SIGNAL_Y: getRandomNumber(330, 370),
+        S_SIGNAL_X: getRandomNumber(130, 150),
+        S_SIGNAL_Y: getRandomNumber(320, 360),
+        T_SIGNAL_X: getRandomNumber(200, 215),
+        T_SIGNAL_Y: getRandomNumber(260, 300),
+        P_SIGNAL_X: getRandomNumber(40, 50),
+        P_SIGNAL_Y: getRandomNumber(280, 290),
+        OXIGENACION: getRandomNumber(80, 98),
+        RITMOCARDIACO: getRandomNumber(60, 100),
+        RESP: getRandomNumber(12, 24),
+      };
+      setWeeklyAverage(randomData2);
+    }, [])
+  );
 
   console.log(lastRecord);
   console.log(weeklyAverage);
@@ -142,14 +136,9 @@ const Statistics = ({ route }) => {
           <>
             <RNText style={styles.Textonormal}>Señal Actual</RNText>
             <MedicalHistoryGraph SignalData={lastRecord} />
-            <RNText style={styles.Textonormal}>Oxigenacion: {'90'}</RNText>
-            <RNText style={styles.Textonormal}>Ritmo cardiaco: {'85'}</RNText>
-            <RNText style={styles.Textonormal}>Frecuencia respiratoria: {'95'}</RNText>
-            {/* Agrega aquí el código para mostrar el promedio semanal 
-            <RNText style={styles.Textonormal}>Oxigenacion: {SignalData.OXIGENACION}</RNText>
-            <RNText style={styles.Textonormal}>Ritmo cardiaco: {SignalData.RITMOCARDIACO}</RNText>
-            <RNText style={styles.Textonormal}>Frecuencia respiratoria: {SignalData.RESP}</RNText>
-            */}
+            <RNText style={styles.Textonormal}>Oxigenacion: {lastRecord.OXIGENACION}</RNText>
+            <RNText style={styles.Textonormal}>Ritmo cardiaco: {lastRecord.RITMOCARDIACO}</RNText>
+            <RNText style={styles.Textonormal}>Frecuencia respiratoria: {lastRecord.RESP}</RNText>
           </>
         ) : (
           <ActivityIndicator />
@@ -164,14 +153,9 @@ const Statistics = ({ route }) => {
         {weeklyAverage ? (
           <>
             <MedicalHistoryGraph SignalData={weeklyAverage} />
-            <RNText style={styles.Textonormal}>Oxigenacion: {'95'}</RNText>
-            <RNText style={styles.Textonormal}>Ritmo cardiaco: {'70'}</RNText>
-            <RNText style={styles.Textonormal}>Frecuencia respiratoria: {'80'}</RNText>
-            {/* Agrega aquí el código para mostrar el promedio semanal 
-            <RNText style={styles.Textonormal}>Oxigenacion: {SignalData.OXIGENACION}</RNText>
-            <RNText style={styles.Textonormal}>Ritmo cardiaco: {SignalData.RITMOCARDIACO}</RNText>
-            <RNText style={styles.Textonormal}>Frecuencia respiratoria: {SignalData.RESP}</RNText>
-            */}
+            <RNText style={styles.Textonormal}>Oxigenacion: {weeklyAverage.OXIGENACION}</RNText>
+            <RNText style={styles.Textonormal}>Ritmo cardiaco: {weeklyAverage.RITMOCARDIACO}</RNText>
+            <RNText style={styles.Textonormal}>Frecuencia respiratoria: {weeklyAverage.RESP}</RNText>
           </>
         ) : (
           <ActivityIndicator />

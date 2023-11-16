@@ -1,8 +1,9 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-
+import { Constants } from 'expo-constants';
 const GetGraph = async(id) => {
-  const register = 'http://10.214.147.129:5000/signal?id=' + id;
+  const Url = "http://192.168.100.61:5000";
+  const register = `${Url}/Coordinates?id=` + id;
   try {
     const response = await fetch(register);
     const jsonData = await response.json();

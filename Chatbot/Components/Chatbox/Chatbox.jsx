@@ -4,9 +4,10 @@ import ChatMessage from './ChatMessage'
 import { StyleSheet, View } from 'react-native'
 import ChatboxFooter from './ChatboxFooter'
 import axios from 'axios';
-
+import { Constants } from 'expo-constants'
 const Chatbox = () => {
-
+  const Url = Constants?.expoConfig?.extra?.chatbotUrl;
+  const defaultMessage = { name: 'Info', message: 'Disculpa, en este momento tengo problemas para conectarme a internet. Inténtalo después.' };
   const [messages, setMessages] = useState([]);
   const [showLayers, setShowLayers] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -14,6 +15,10 @@ const Chatbox = () => {
   const [isTextboxVisible, setIsTextboxVisible] = useState(false);
   const [capa1, setCapa1] = useState(false);
   const [capa2, setCapa2] = useState(false);
+
+  const showDefaultMessage = () => {
+    setMessages([defaultMessage]);
+  };
   //const [Return, setCapa2] = useState(false);
 
   const toggleLayers = () => {
@@ -30,6 +35,7 @@ const Chatbox = () => {
   };
 
   const handleButtonClick = () => {
+    showDefaultMessage();
     toggleChatMessageVisibility();
     toggleTextboxVisibility(); 
   };
@@ -40,10 +46,10 @@ const Chatbox = () => {
   
     const userMessage = { name: 'User', message: inputText };
     setMessages([...messages, userMessage]);
-  
+    /*
     try {
       // const response = await globalThis.fetch('http://localhost:5000/status', {
-      const response = await globalThis.fetch('http://10.0.2.2:5000/status', {
+      const response = await globalThis.fetch(`${Url}/status`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -63,13 +69,15 @@ const Chatbox = () => {
     } catch (error) {
       console.error('Error:', error.message);
     }
+    */
+
   };
   const onSendButton2 = async () => {
     if (!inputText) return;
   
     const userMessage = { name: 'User', message: inputText };
     setMessages([...messages, userMessage]);
-  
+  /*
     try {
       // const response = await globalThis.fetch('http://localhost:5000/status', {
       const response = await globalThis.fetch('http://10.0.2.2:5000/predict', {
@@ -92,6 +100,7 @@ const Chatbox = () => {
     } catch (error) {
       console.error('Error:', error.message);
     }
+    */
   };
 
 
@@ -112,8 +121,8 @@ const Chatbox = () => {
           handleButtonClick={handleButtonClick}
           isTextboxVisible={isTextboxVisible}
           toggleChatMessageVisibility={toggleChatMessageVisibility}
-          onSendButton={onSendButton}
-          onSendButton2={onSendButton2}
+          onSendButton={() => { showDefaultMessage(); onSendButton(); }}
+          onSendButton2={() => { showDefaultMessage(); onSendButton2(); }}
           toggleLayers={toggleLayers}
           showLayers={showLayers}
           inputText={inputText} 
@@ -122,9 +131,8 @@ const Chatbox = () => {
           capa1={capa1}>
         </ChatboxFooter>
     </View>
-
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

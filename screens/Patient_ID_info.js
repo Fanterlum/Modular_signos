@@ -26,8 +26,8 @@ const Patient_ID_info = ({route}) => {
   const {Json} = useJson();
   const [data, setData] = useState(null);
   //Aqui van los estados del paciente
-  const [ActualState, setActualState] = useState(1); //ESTADO ACTUAL
-  const [FutureState, setFutureStare] = useState(2); //Estado futuro
+  const [ActualState, setActualState] = useState(2); //ESTADO ACTUAL
+  const [FutureState, setFutureStare] = useState(1); //Estado futuro
 
     useEffect(() => {
       const fetchDataWithId = async (id) => {
@@ -36,14 +36,17 @@ const Patient_ID_info = ({route}) => {
           const jsonData = await GetInfo(id);
           setNombre(jsonData.username);
           setApellido(jsonData.apellidos);
-          setActualState(jsonData.status);
+          if(jsonData.status>=0 && jsonData.status<=2){
+            setActualState(jsonData.status);
+            console.log("Entra");
+          }
           // Puedes actualizar otras variables de estado según sea necesario
         } catch (error) {
           console.error('Error al obtener el JSON:', error);
         }
       };
       fetchDataWithId(userId);
-    }, []);
+    }, [userId]);
 
     let primerApellido = '';
     if (Json && Json.apellidos) {
@@ -63,36 +66,38 @@ const Patient_ID_info = ({route}) => {
       navigation.navigate('History');
     };
     return (
-        <View style={styles.MainContainer}>
-          <View style={styles.photoContainer}>
-            <Text style={styles.titleText}>Datos del paciente:</Text>
-            <Image source={imageUrl} style={styles.PatientPhoto}
-                    resizeMode="contain" // Controla cómo se ajusta la imagen
-                    />
-          </View>
-          <View style={styles.infoContainer}>
-            <Text style={styles.DataText2}>Nombre: {nombre}</Text>
-            <Text style={styles.DataText}>Apellido: {apellido}</Text>
-            <Text style={styles.DataText}>Edad: {edad}</Text>
-            <Text style={styles.DataText}>Doctor a cargo: {Doctor}</Text>
-    
-          </View>
-          <View style={styles.Patient_StatusContainer}>
-          <View style={[styles.estados, { backgroundColor: ColorAssigner({ numero: ActualState }) }]}>
-            <Text style={styles.StatusText}>Status Actual: {TextAssigner({ numero: ActualState })}</Text>
-          </View>
-          <View style={[styles.estados, { backgroundColor: ColorAssigner({ numero: FutureState }) }]}>
-            <Text style={styles.StatusText}>Status Futuro: {TextAssigner({ numero: FutureState })}</Text>
-          </View>
-          </View>
-          <View style={styles.botContainer}>
-        {/* botContainer se superpondrá sobre los demás elementos */}
-        <View style={styles.buttonChatboxContainer}>
-          {/* ButtonChatbox se posicionará en la mitad de la pantalla */}
+      <View style={styles.MainContainer}>
+        <View style={styles.photoContainer}>
+          <Text style={styles.titleText}>Datos del paciente:</Text>
+          <Image source={imageUrl} style={styles.PatientPhoto}
+                  resizeMode="contain" // Controla cómo se ajusta la imagen
+                  />
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.DataText2}>Nombre: {nombre}</Text>
+          <Text style={styles.DataText}>Apellido: {apellido}</Text>
+          <Text style={styles.DataText}>Edad: {edad}</Text>
+          <Text style={styles.DataText}>Doctor a cargo: {Doctor}</Text>
+  
+        </View>
+        <View style={styles.Patient_StatusContainer}>
+        <View style={[styles.estados, { backgroundColor: ColorAssigner({ numero: ActualState }) }]}>
+          <Text style={styles.StatusText}>Status Actual: {TextAssigner({ numero: ActualState })}</Text>
+        </View>
+        <View style={[styles.estados, { backgroundColor: ColorAssigner({ numero: FutureState }) }]}>
+          <Text style={styles.StatusText}>Status Futuro: {TextAssigner({ numero: FutureState })}</Text>
+        </View>
+        </View>
+        <View style={styles.chatbotContainer}>
+        <TouchableOpacity style={[styles.historial]} onPress={navigateToHistory}>
+          <Text style={[styles.StatusText, {marginLeft: "10%",}]}>Historial Clinico</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.estadistica]} onPress={() => navigateToStatistics(userId)}>
+          <Text style={[styles.StatusText, {marginLeft: "13%",}]}>Estadisticas</Text>
+        </TouchableOpacity>
           <ButtonChatbox></ButtonChatbox>
         </View>
       </View>
-        </View>
       )
 }
 

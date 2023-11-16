@@ -15,7 +15,6 @@ import {UserProvider} from './components/Context/UserProvider';
 import { EmailProvider } from './components/Context/EmailProvider';
 import { JsonProvider } from './components/Context/JsonProvider';
 import { PatientList } from './components/Context/PatientList';
-
 const Stack = createStackNavigator();
 
 export default function App() {

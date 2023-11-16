@@ -4,10 +4,11 @@ import Svg, { Line, Circle, Rect, Text } from 'react-native-svg';
 import { Text as RNText } from 'react-native'; // Importa Text de react-native
 //De aqui se trae de la base de datos la grafica
 import GetGraph from '../backend/GetGraph';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ECG = ({SignalData}) => {
   const graphWidth = SignalData.PUNTO_FINAL_X + 10;
-  const graphHeight = 300;
+  const graphHeight = 380;
   const backgroundColor = 'white';
   const gridLineColor = 'red';
   const gridSize = 20;
@@ -67,22 +68,33 @@ const ECG = ({SignalData}) => {
 const Statistics = ({route}) => {
   const userId = route.params?.userId;
   const [SignalData, setSignalData] = useState();
-
-
-  useEffect(() => {
-    const fetchDataWithId = async (id) => {
-      try {
-        // Llama a la función GetInfo para obtener datos basados en el ID
-        const jsonData = await GetGraph(id);
-        setSignalData(jsonData);
-        // Puedes actualizar otras variables de estado según sea necesario
-      } catch (error) {
-        console.error('Error al obtener el JSON:', error);
-      }
-    };
-    fetchDataWithId(userId); // Llama a la función de carga de datos cuando userId cambie
-  }, []); // Esto asegura que se llame cuando userId cambie
-  console.log(SignalData);
+  const getRandomNumber = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      const randomData = {
+        PRIMER_PUNTO_X: 0,
+        PRIMER_PUNTO_Y: getRandomNumber(300, 331),
+        PUNTO_MAS_ALTO_X: getRandomNumber(100, 120),
+        PUNTO_MAS_ALTO_Y: getRandomNumber(30, 60),
+        PUNTO_FINAL_X: getRandomNumber(255, 270),
+        PUNTO_FINAL_Y: getRandomNumber(320, 350),
+        Q_SIGNAL_X: getRandomNumber(90, 110),
+        Q_SIGNAL_Y: getRandomNumber(330, 370),
+        S_SIGNAL_X: getRandomNumber(130, 150),
+        S_SIGNAL_Y: getRandomNumber(320, 360),
+        T_SIGNAL_X: getRandomNumber(200, 215),
+        T_SIGNAL_Y: getRandomNumber(260, 300),
+        P_SIGNAL_X: getRandomNumber(40, 50),
+        P_SIGNAL_Y: getRandomNumber(280, 290),
+        OXIGENACION: getRandomNumber(80, 98),
+        RITMOCARDIACO: getRandomNumber(60, 100),
+        RESP: getRandomNumber(12, 24),
+      };
+      setSignalData(randomData);
+    }, [])
+  );
   
   return (
     <>

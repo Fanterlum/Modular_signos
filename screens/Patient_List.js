@@ -1,6 +1,7 @@
 import { FlatList, View, Text, Button, TouchableOpacity, Image} from 'react-native';
 import React, {useEffect} from 'react';
 import { StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 //Backend
@@ -25,17 +26,17 @@ const Patient_List = () => {
   const {Json} = useJson();
   const {setList} = useList();
   //console.log(Json);
-  useEffect(() => {
+  useFocusEffect(
+    React.useCallback(() => {
     // Llamar a getUserInfo cuando el componente se monte
     const cedula = '2';
      // Reemplaza con el ID de usuario adecuado
     getPatientsInfo(cedula);
-  }, []); // El segundo argumento [] significa que esto se ejecutará solo una vez al montar el componente
-
+    }, [])
+  );
   const getPatientsInfo = async (cedula) => {
     try {
       const pacientes = await GetPatientof({cedula: cedula});
-      // Almacena UserJson en el contexto
       setList(pacientes);
     } catch (error) {
       console.error("Error al obtener la información del usuario:", error);

@@ -23,36 +23,35 @@ import {useUser} from '../components/Context/UserProvider';
 import { useEmail } from "../components/Context/EmailProvider";
 import { useJson } from "../components/Context/JsonProvider";
 const Login = () => {
-
   const { setUserID } = useUser();
-  const {setEmail} = useEmail();
+  const { setEmail } = useEmail();
   const { setJson } = useJson();
   const navigation = useNavigation();
-  navigation.navigate('Home'); // Navegar a la pantalla HomeScreen
 
   const [Correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
+
   const getUserInfo = async (userID) => {
-      try {
-        const UserJson = await GetInfo(userID);
-        // Almacena UserJson en el contexto
-        setJson(UserJson);
-      } catch (error) {
-        console.error("Error al obtener la información del usuario:", error);
-      }
-    };
+    try {
+      const UserJson = await GetInfo(userID);
+      setJson(UserJson);
+    } catch (error) {
+      console.error("Error al obtener la información del usuario:", error);
+    }
+  };
+
   const handleLogin = async () => {
     const JsonLogin = await Logged2(Correo, password);
     console.log("Esto es el completo:");
     console.log(JsonLogin);
-    //comentario
-    if (JsonLogin.logged || Correo == "admin") {
+
+    if (JsonLogin.logged || Correo === "admin") {
       console.log('Credenciales correctas');
       const userID = JsonLogin.id;
       setUserID(userID);
       setEmail(Correo);
       getUserInfo(userID);
-      navigation.navigate('Home'); // Navegar a la pantalla HomeScreen
+      navigation.navigate('Home');
     } else {
       Alert.alert('Correo y/o contraseña incorrecta!!');
     }
@@ -85,12 +84,13 @@ const Login = () => {
       />
       <Button title="Iniciar Sesión" onPress={handleLogin} color='#1C2B2E'/>
       <TouchableOpacity style={styles.button} onPress={handleRegistro}>
-      <Text>{'\n'}</Text>
+        <Text>{'\n'}</Text>
         <Text style={styles.boton_registro}>¿No tienes cuenta? Regístrate aquí.</Text>
       </TouchableOpacity>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

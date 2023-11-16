@@ -1,8 +1,9 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-
+import { Constants } from 'expo-constants';
 const SetDoctor = (Nombre, Apellidos, Correo, password, Tipo_Usuario) => {
-    const register = 'http://10.214.147.129:5000/CrteData?username='+Nombre+
+    const Url = "http://192.168.100.61:5000";
+    const register = `${Url}/CrteData?username=`+Nombre+
     '&apellidos='+Apellidos+
     '&Email='+Correo+
     '&Password='+password+
