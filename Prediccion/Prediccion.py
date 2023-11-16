@@ -7,7 +7,10 @@ import pathlib
 import json
 #import pandas as pd
 from scipy.optimize import curve_fit
-
+import random, time
+from Connections import RPC
+rpc=RPC()
+rpc.appOnion(f'http://{rpc.ipSource}:20064')
 class Regression:
     def __init__(self,name_Data) -> None:
         self.name_Data=name_Data
@@ -101,17 +104,19 @@ class CardiacMetrics:
         self.rS_SIGNAL = Regression('S')
         self.rT_SIGNAL = Regression('T')
         self.rP_SIGNAL = Regression('P')
+        self.qrs_SIGNAL = Regression('Distancias QRS')
         #"iniciar red neuronal"
         self.oculta1 = tf.keras.layers.Dense(units=3, input_shape=[1])
         self.oculta2 = tf.keras.layers.Dense(units=3)
         self.salida = tf.keras.layers.Dense(units=1)
         self.modelo = tf.keras.Sequential([self.oculta1, self.oculta2, self.salida])
         self.modelo.compile(
-            optimizer=tf.keras.optimizers.Adam(0.1),
+            optimizer=tf.keras.optimizers.Adam(0.2),
             loss='mean_squared_error'
         )
     def load_Data(self,FolderMetrics="paciente"):
         #ondas=[]
+        idDebug=random.randint(0,38)
         ondas_INI=[]
         ondas_p=[]
         ondas_q=[]
@@ -138,48 +143,50 @@ class CardiacMetrics:
             with open(dir+file,"r") as f:
                 data = json.load(f)
             nFile+=1
+            debugini=1
+            debugfin=5
             ondas_INI.append((
                 #ini
-            600-data["PRIMER_PUNTO_Y"],#0
-            data["PRIMER_PUNTO_X"],#1
+            600-data["PRIMER_PUNTO_Y"]+random.randint(debugini,debugfin),#0
+            data["PRIMER_PUNTO_X"]-random.randint(debugini,debugfin),#1
             nFile
             ))
             ondas_p.append((
                 #P
-            600-data["P_SIGNAL_Y"],#0
-            data["P_SIGNAL_X"],#1
+            600-data["P_SIGNAL_Y"]+random.randint(debugini,debugfin),#0
+            data["P_SIGNAL_X"]-random.randint(debugini,debugfin),#1
             nFile
             ))
             ondas_q.append((
                 #Q
-            600-data["Q_SIGNAL_Y"],#0
-            data["Q_SIGNAL_X"],#1
+            600-data["Q_SIGNAL_Y"]+random.randint(debugini,debugfin),#0
+            data["Q_SIGNAL_X"]-random.randint(debugini,debugfin),#1
             nFile
             ))
 
             ondas_r.append((
                 #PA
-            600-data["PUNTO_MAS_ALTO_Y"],#0
-            data["PUNTO_MAS_ALTO_X"],#1
+            600-data["PUNTO_MAS_ALTO_Y"]+random.randint(debugini,debugfin),#0
+            data["PUNTO_MAS_ALTO_X"]-random.randint(debugini,debugfin),#1
             nFile
             ))
 
             ondas_s.append((
                 #S
-            600-data["S_SIGNAL_Y"],#0
-            data["S_SIGNAL_X"],#1
+            600-data["S_SIGNAL_Y"]+random.randint(debugini,debugfin),#0
+            data["S_SIGNAL_X"]-random.randint(debugini,debugfin),#1
             nFile
             ))
             ondas_t.append((
                 #T
-            600-data["T_SIGNAL_Y"],#0
-            data["T_SIGNAL_X"],#1
+            600-data["T_SIGNAL_Y"]+random.randint(debugini,debugfin),#0
+            data["T_SIGNAL_X"]-random.randint(debugini,debugfin),#1
             nFile
             ))
             ondas_FINAL.append((
                 #fin
-            600-data["PUNTO_FINAL_Y"],#0
-            data["PUNTO_FINAL_X"],#1
+            600-data["PUNTO_FINAL_Y"]+random.randint(debugini,debugfin),#0
+            data["PUNTO_FINAL_X"]-random.randint(debugini,debugfin),#1
             nFile
             ))
         
@@ -251,12 +258,14 @@ class CardiacMetrics:
             marker='o'
         )
             
-        ax.set_title("3d Line plot in Matplotlib", fontsize=14, fontweight="bold")
+        ax.set_title(f"Paciente ID : {idDebug}", fontsize=14, fontweight="bold")
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.set_zlabel("nOndas")
         
-        plt.show()
+        plt.show(block=False)
+        plt.pause(5)
+        plt.close(1)
         #orderOndas=sorted(ondas,key=lambda onda : onda[1])
         #nOndas=len(order_r)
         #x_list=[x for x in range(nOndas)]
@@ -307,6 +316,13 @@ class CardiacMetrics:
                 [onda[0] for onda in order_FINAL]
             ]
         )
+        #programar funcion de distancia
+        self.qrs_SIGNAL.fit(
+            [
+                [],
+                []
+            ]
+        )
 
         self.rPRIMER_PUNTO.CalcularC_Lineares()
         
@@ -316,13 +332,15 @@ class CardiacMetrics:
 
         #self.rPUNTO_MAS_ALTO.CalcularC_Lineares()
 
-        #self.rS_SIGNAL.CalcularC_NoLineares()
+        self.rS_SIGNAL.CalcularC_NoLineares()
         self.rT_SIGNAL.CalcularC_Lineares()
         
 
         self.rPUNTO_FINAL.CalcularC_Lineares()
+
+        self.qrs_SIGNAL.CalcularC_Lineares()
     def statusFibrilacion(self,p,q,r,s,t):
-        tolerancia=10
+        tolerancia=20
         if p>(r-tolerancia):
             return 1
         elif q>(r-tolerancia):
@@ -335,29 +353,29 @@ class CardiacMetrics:
             return 0
     def statusTaquicardia(self,q,s):
         status=1
-        t=20
+        t=280
         pS=self.modelo.predict([q])[0][0]
-        rQ=self.rQ_SIGNAL.predict(s,"F1")
+        rQ=self.rQ_SIGNAL.predict(pS,"F1")
         if s > pS-t and pS+t > s:
             if q > rQ-t and rQ+t > q:
                 status=0
         return status
 
     def status(self,file="JS_14_4.json"):
-        dir = f'{os.getcwd()}/paciente/test/'
+        dir = f'{os.getcwd()}/paciente/'
         with open(dir+file,"r") as f:
                 data = json.load(f)
-                onda=(500-data["PRIMER_PUNTO_Y"],
+                onda=(600-data["PRIMER_PUNTO_Y"],
              
-                    500-data["P_SIGNAL_Y"],
-                    500-data["Q_SIGNAL_Y"],
+                    600-data["P_SIGNAL_Y"],
+                    600-data["Q_SIGNAL_Y"],
 
-                    500-data["PUNTO_MAS_ALTO_Y"],
+                    600-data["PUNTO_MAS_ALTO_Y"],
 
-                    500-data["S_SIGNAL_Y"],
-                    500-data["T_SIGNAL_Y"],
+                    600-data["S_SIGNAL_Y"],
+                    600-data["T_SIGNAL_Y"],
 
-                    500-data["PUNTO_FINAL_Y"]
+                    600-data["PUNTO_FINAL_Y"]
                 )
         return self.statusFibrilacion(
             onda[1],
@@ -365,21 +383,44 @@ class CardiacMetrics:
             onda[3],
             onda[4],
             onda[5])+self.statusTaquicardia(onda[2],onda[4])
-
-    def fit(self,FolderMetrics="paciente"):
+    def status_Total(self,FolderMetrics="paciente"):
+        if not FolderMetrics is None:
+            #se odtiene la ruta acsoluta 
+            # y se concatena con el nombre de la carpeta
+            dir = f'{os.getcwd()}/{FolderMetrics}/'
+            #se revisa el contenido de la carpeta
+            directorio = pathlib.Path(dir)
+            #se crea una lista para guardar los nombres de los archivos 
+            filesNames = []
+            #se recore cada fichero para filtrar los archivos
+            for fichero in directorio.iterdir():
+                if fichero.is_file():
+                    filesNames.append(fichero.name)
+                    #se organizan los nombres de los archivos 
+                    filesNames.sort()
+        for file in filesNames:
+            print(f'status: {self.status(file)}')
+            print(f'envio : enpoint')
+            time.sleep(0.5)
+    def fit(self):
         
         print("Comenzando entrenamiento...")
-        '''model_Q=np.array([self.rQ_SIGNAL.predict(x_list[i],"F1") for i in range(nOndas)], dtype=int)
-        model_S=np.array(x_list, dtype=int)'''
-        distQR=np.array([])
-        distSR=np.array([])
-        simetria= self.modelo.fit(distQR, distSR, epochs=45, verbose=False)
+        model_Q=np.array([self.rQ_SIGNAL.predict(i,"F1") for i in range(0,len(self.rQ_SIGNAL.x))], dtype=int)
+        model_Qx=self.rQ_SIGNAL.x
+        '''distQR=np.array([qrs[0] for qrs in self.qrs_SIGNAL])
+        distSR=np.array([qrs[1] for qrs in self.qrs_SIGNAL])'''
+        simetria = self.modelo.fit(model_Q, model_Qx, epochs=45, verbose=False)
         print("Modelo entrenado!")
 
         '''plt.xlabel("# Epoca")
         plt.ylabel("Magnitud de pérdida")
         plt.plot(simetria.history["loss"])'''
         
+    def fitFake(self):
+        print(rpc.ipSource)
+        for i in range(1,20):
+            print(i)
+            print(rpc.getOnion(0).setStatus(random.randint(0,2)))
 
     def show_test(self):
         q=self.rQ_SIGNAL.predict(215,"F1")
@@ -396,7 +437,7 @@ class CardiacMetrics:
 
         #self.rPUNTO_MAS_ALTO.fit_show("L")
 
-        #self.rS_SIGNAL.fit_show("F1")
+        self.rS_SIGNAL.fit_show("F1")
 
         self.rT_SIGNAL.fit_show("L")
         self.rPUNTO_FINAL.fit_show("L")
